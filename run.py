@@ -68,6 +68,22 @@ def example_theory():
 def test_kenken():
     #row[i] << - >> (the row i contains the digits 1-5)
     #col[i] << - >> (the col i contains the digits 1-5)
+    #o[i]   << - >> (when the the region i uses the operator in o[i][2] on the elements in o[i][0] to create an output equal to o[i][1])
+        # Idea for this -> we may need to apply binary arithmetic logic structures? If we can use operations rather than purely logic we would avoid this. I need to finish the video first.
+
+
+    # To qualify as a "good" kenken board there should only be one solution to the puzzle.
+    # Time taken or steps required to solve the board can be used in approximating the "difficulty"
+
+
+    # Are we going to go through all of the potential values for each square? Is that how it is going to solve?
+    # In this case we model each square with having the values between 1-5 inclusive.
+    # In binary, we can represent this as 001, 010, 011, 100, 101
+    # If it has two leading zeroes: must be 001
+    # If it leads with a 1: must be 101
+
+
+
     return
 
 
@@ -75,8 +91,8 @@ def test_kenken():
 if __name__ == "__main__":
 
     T = example_theory()
-    print("Just testing the example theory. Ignore below.")
-    print("\nSatisfiable: %s" % T.is_satisfiable())
+    print("\nJust testing the example theory. Ignore below.")
+    print("Satisfiable: %s" % T.is_satisfiable())
     print("# Solutions: %d" % T.count_solutions())
     print("   Solution: %s" % T.solve())
 
