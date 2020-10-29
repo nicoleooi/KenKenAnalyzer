@@ -69,6 +69,7 @@ def test_kenken():
     #row[i] << - >> (the row i contains the digits 1-5)
     #col[i] << - >> (the col i contains the digits 1-5)
     #o[i]   << - >> (when the the region i uses the operator in o[i][2] on the elements in o[i][0] to create an output equal to o[i][1])
+    #squareValue << - >> (true if one of these values: 001, 010, 011, 100, 101)
         # Idea for this -> we may need to apply binary arithmetic logic structures? If we can use operations rather than purely logic we would avoid this. I need to finish the video first.
 
 
@@ -79,8 +80,6 @@ def test_kenken():
     # Are we going to go through all of the potential values for each square? Is that how it is going to solve?
     # In this case we model each square with having the values between 1-5 inclusive.
     # In binary, we can represent this as 001, 010, 011, 100, 101
-    # If it has two leading zeroes: must be 001
-    # If it leads with a 1: must be 101
 
 
 
