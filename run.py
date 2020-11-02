@@ -157,13 +157,21 @@ def test_kenken():
 
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists & four_exists & five_exists))
 
-    return
+    return E
 
-
+"""
+For reference:
+def example_theory():
+    E = Encoding()
+    E.add_constraint(a | b)
+    E.add_constraint(~a | ~x)
+    E.add_constraint(c | y | z)
+    return E
+"""
 
 if __name__ == "__main__":
 
-    test_kenken()
+    T = test_kenken()
     # T = example_theory()
     # print("\nJust testing the example theory. Ignore below.")
     # print("Satisfiable: %s" % T.is_satisfiable())
