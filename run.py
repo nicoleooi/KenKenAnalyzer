@@ -11,9 +11,15 @@ N = 5
 # make row and column lists
 # row i is true if the row has all the required numbers
 # col i is true if the col has all the required numbers
+"""
 for i in range(N):
-    row.append(Var(f'row_{i}'))
+    row.append(Var(f'row_{i}')) # removed this as aux variables temporarily
     col.append(Var(f'col_{i}'))
+"""
+for i in range(N):
+    row.append(f'row_{i}')
+    col.append(f'col_{i}')
+
 
 print(row)
 print(col)
@@ -26,7 +32,7 @@ squares_valid = []
 for i in range(N): 
     for j in range(N): 
             charOffset = chr(ord('a')+i)
-            squares_valid.append(Var(f'{charOffset}{j}'))
+            squares_valid.append(f'{charOffset}{j}') #removed valid square aux variable temporarily
 
 
 # should find a way to categorize the squares into regions automatically given a config text file ... 
@@ -63,6 +69,15 @@ for i in range(N): #Columns
         squares_values.append(vals_list)
 print(squares_values)
 
+def getSquareVal(squareVar):
+    """
+    Used to retrieve the value of the number represented from the nnf Var passed in as a parameter
+    Will be used in the cage arithmetic section - not implemented yet
+    """
+    for x in squareVar.name:
+        if x.isdigit():
+            num = x
+    return int(num)
 
 def iff(left, right):
     return (left.negate() | right) & (right.negate() | left)
@@ -89,8 +104,10 @@ def test_kenken():
         is_four = (~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & squares_values[i][3] & ~squares_values[i][4])
         is_five = (~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & squares_values[i][4])
 
-        #square is valid iff the square holds one of these values
-        E.add_constraint(iff(squares_valid[i], ( is_one | is_two | is_three | is_four | is_five )) )
+        # Square is valid iff the square holds one of these values
+        #E.add_constraint(iff(squares_valid[i], ( is_one | is_two | is_three | is_four | is_five )) )
+        #E.add_constraint(squares_valid[i])
+        E.add_constraint(( is_one | is_two | is_three | is_four | is_five )) #Temporarily removed auxiliary variables in attempt to reduce solving time
         
                     
     # Constraint for valid rows
@@ -124,7 +141,9 @@ def test_kenken():
                     (~squares_values[i+4][0]& ~squares_values[i+4][1] & ~squares_values[i+4][2] & ~squares_values[i+4][3] & squares_values[i+4][4]))
         
         # Add constraint to to row[0-4] auxilliary variables to check validity of rows
-        E.add_constraint(iff(row[int(i/5)], one_exists & two_exists & three_exists & four_exists & five_exists))
+        #E.add_constraint(iff(row[int(i/5)], one_exists & two_exists & three_exists & four_exists & five_exists))
+        #E.add_constraint(row[int(i/5)])
+        E.add_constraint(one_exists & two_exists & three_exists & four_exists & five_exists)
 
     # Constraint for valid cols
     for i in range(5):
@@ -155,13 +174,13 @@ def test_kenken():
                     (~squares_values[i+15][0]& ~squares_values[i+15][1] & ~squares_values[i+15][2] & ~squares_values[i+15][3] & squares_values[i+15][4]) |
                     (~squares_values[i+20][0]& ~squares_values[i+20][1] & ~squares_values[i+20][2] & ~squares_values[i+20][3] & squares_values[i+20][4]))
 
-        E.add_constraint(iff(col[i], one_exists & two_exists & three_exists & four_exists & five_exists))
+        #E.add_constraint(iff(col[i], one_exists & two_exists & three_exists & four_exists & five_exists))
+        #E.add_constraint(col[i])
+        E.add_constraint(one_exists & two_exists & three_exists & four_exists & five_exists)
 
-"""
-Use discussion post answer here to model arithmetic: https://onq.queensu.ca/d2l/le/398978/discussions/threads/3985242/View
-"""
-
-
+    """
+    Use discussion post answer here to model arithmetic: https://onq.queensu.ca/d2l/le/398978/discussions/threads/3985242/View
+    """
 
 
     return E
@@ -169,6 +188,12 @@ Use discussion post answer here to model arithmetic: https://onq.queensu.ca/d2l/
 """
 For reference:
 def example_theory():
+    a = Var('a')
+    b = Var('b')
+    c = Var('c')
+    x = Var('x')
+    y = Var('y')
+    z = Var('z')
     E = Encoding()
     E.add_constraint(a | b)
     E.add_constraint(~a | ~x)
@@ -179,13 +204,12 @@ def example_theory():
 if __name__ == "__main__":
 
     T = test_kenken()
-    # T = example_theory()
-    # print("\nJust testing the example theory. Ignore below.")
-    # print("Satisfiable: %s" % T.is_satisfiable())
-    # print("# Solutions: %d" % T.count_solutions())
-    # print("   Solution: %s" % T.solve())
+    print("\nJust testing the example theory. Ignore below.")
+    print("Satisfiable: %s" % T.is_satisfiable())
+    print("# Solutions: %d" % T.count_solutions())
+    print("   Solution: %s" % T.solve())
 
-    # print("\nVariable likelihoods:")
-    # for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):
-    #     print(" %s: %.2f" % (vn, T.likelihood(v)))
-    # print()
+    """print("\nVariable likelihoods:")
+    for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):
+        print(" %s: %.2f" % (vn, T.likelihood(v)))"""
+    print()
