@@ -10,7 +10,8 @@ The purpose of this project is to read a 5x5 Kenken board configuration and prov
 As of this version, all the developed code for the project can be found in run.py. One-hot encoding is used with booleans to represent the possible inputs of 1-5 in each of the kenken squares. The row and column constraints have been coded, and the team is currently working on incorperating the constraints for checking the arithmetic of each "cage" using logic.
 
 The board configuration must be manually inputted, however the team is considering creating the ability to read the configuration from a txt file. The current board configuration inputted is shown below.
-![Image of kenken board configuration](https://github.com/CISC-204/modelling-project-107/tree/master/images/Kenken_Board.png)
+
+![Image of kenken board configuration](https://raw.githubusercontent.com/CISC-204/modelling-project-107/master/images/Kenken_Board.png?token=AHC3LHG43YIACQTE67INB7K7VF4IE)
 
 
 ## Structure
