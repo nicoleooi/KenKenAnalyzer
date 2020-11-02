@@ -49,21 +49,21 @@ for item in o:
 print("* Note: ! indicates singular value in the specified box")
 
 squares_values = []
-for i in range(N): 
-    for j in range(N): 
-        #create a list for each square
+
+
+for i in range(N): #Columns
+    for j in range(N): #Rows
+        # Create a list for each square
         vals_list = []
-        for x in range(N):
+        for x in range(1,N+1):
             charOffset = chr(ord('a')+i)
+
+            # Create booleans in each list corresponding to if the square is 1,2,3,4, or 5
             vals_list.append(Var(f'{charOffset}{j}'+'_'+f'{x}'))
         squares_values.append(vals_list)
+print(squares_values)
 
-#
-# Build an example full theory for your setting and return it.
-#
-#  There should be at least 10 variables, and a sufficiently large formula to describe it (>50 operators).
-#  This restriction is fairly minimal, and if there is any concern, reach out to the teaching staff to clarify
-#  what the expectations are.
+
 def iff(left, right):
     return (left.negate() | right) & (right.negate() | left)
 
@@ -93,9 +93,10 @@ def test_kenken():
         E.add_constraint(iff(squares_valid[i], ( is_one | is_two | is_three | is_four | is_five )) )
         
                     
-    #constraint for valid rows
-    for i in range(len(squares_values), 5): #increment by 5
-        #a row is valid iff it contains the numbers 1-5
+    # Constraint for valid rows
+    for i in range(0,len(squares_values), 5): #increment by 5
+        # a row is valid iff it contains the numbers 1-5
+        # Check combinations of squares_values[square of index 0-24][value]
         one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
                     (squares_values[i+1][0]& ~squares_values[i+1][1] & ~squares_values[i+1][2] & ~squares_values[i+1][3] & ~squares_values[i+1][4]) |
                     (squares_values[i+2][0]& ~squares_values[i+2][1] & ~squares_values[i+2][2] & ~squares_values[i+2][3] & ~squares_values[i+2][4]) |
@@ -122,11 +123,12 @@ def test_kenken():
                     (~squares_values[i+3][0]& ~squares_values[i+3][1] & ~squares_values[i+3][2] & ~squares_values[i+3][3] & squares_values[i+3][4]) |
                     (~squares_values[i+4][0]& ~squares_values[i+4][1] & ~squares_values[i+4][2] & ~squares_values[i+4][3] & squares_values[i+4][4]))
         
-        E.add_constraint(iff(row[i], one_exists & two_exists & three_exists & four_exists & five_exists))
+        # Add constraint to to row[0-4] auxilliary variables to check validity of rows
+        E.add_constraint(iff(row[int(i/5)], one_exists & two_exists & three_exists & four_exists & five_exists))
 
-    #constraint for valid cols
-    for i in range(N):
-        #a row is valid iff it contains the numbers 1-5
+    # Constraint for valid cols
+    for i in range(5):
+        # A column is valid iff it contains the numbers 1-5
         one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
                     (squares_values[i+5][0]& ~squares_values[i+5][1] & ~squares_values[i+5][2] & ~squares_values[i+5][3] & ~squares_values[i+5][4]) |
                     (squares_values[i+10][0]& ~squares_values[i+10][1] & ~squares_values[i+10][2] & ~squares_values[i+10][3] & ~squares_values[i+10][4]) |
@@ -152,8 +154,8 @@ def test_kenken():
                     (~squares_values[i+10][0]& ~squares_values[i+10][1] & ~squares_values[i+10][2] & ~squares_values[i+10][3] & squares_values[i+10][4]) |
                     (~squares_values[i+15][0]& ~squares_values[i+15][1] & ~squares_values[i+15][2] & ~squares_values[i+15][3] & squares_values[i+15][4]) |
                     (~squares_values[i+20][0]& ~squares_values[i+20][1] & ~squares_values[i+20][2] & ~squares_values[i+20][3] & squares_values[i+20][4]))
-        
-        E.add_constraint(iff(row[i], one_exists & two_exists & three_exists & four_exists & five_exists))
+
+        E.add_constraint(iff(col[i], one_exists & two_exists & three_exists & four_exists & five_exists))
 
     return
 
