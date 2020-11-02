@@ -157,6 +157,13 @@ def test_kenken():
 
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists & four_exists & five_exists))
 
+"""
+Use discussion post answer here to model arithmetic: https://onq.queensu.ca/d2l/le/398978/discussions/threads/3985242/View
+"""
+
+
+
+
     return E
 
 """
