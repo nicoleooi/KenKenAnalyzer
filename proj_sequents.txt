@@ -1,0 +1,5 @@
+CONJECTUREPANEL Assignment
+    THEOREM IS (m111∧¬m112∧¬m113)∧(¬m121∧m122∧¬m123) ⊢ (¬m131∧¬m132∧m133)
+    THEOREM IS (m111∧¬m112∧¬m113)∧(¬m211∧m212∧¬m213) ⊢ (¬m311∧¬m312∧m313)
+    THEOREM IS (c1∧c2∧c3)∧(r1∧r2∧r3) ⊢ (m111∨m121∨m131)∧(m211∨m221∨m231)∧(m311∨m321∨m331)	
+END
