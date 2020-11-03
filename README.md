@@ -22,3 +22,4 @@ The board configuration must be manually inputted, however the team is consideri
 * `test.py`: Run this file to confirm that your submission has everything required. This essentially just means it will check for the right files and sufficient theory size.
 * `proj_sequents.txt` : This contains the JAPE sequents we are proposing to prove. It is contained in a text file as we could not add a new theory to JAPE, without including other theorems. 
 * `modelling_presentation_feedbackrequested.pptx` : This contains the explanation of the project. The last slide summarizes the main points we have requested for feedback.
+* `modelling_presentation_feedbackrequested.pdf` : PDF version of the slides for ease of access. 
