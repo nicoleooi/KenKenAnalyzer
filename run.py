@@ -18,7 +18,7 @@ def getSquareVal(atom):
     return int(num)
 
 def iff(left, right):
-    return (left.negate() | right) & (right.negate() | left)
+    return ((left & right) | (left.negate() & right.negate()))
 
 def getTrueAtoms(solution):
     """
@@ -85,7 +85,7 @@ def test_kenken3x3():
     o = []
     o.append([[squares_valid[0],squares_valid[3]],3,'+'])
     o.append([[squares_valid[1],squares_valid[4]],5,'+'])
-    o.append([[squares_valid[3]],1,'!'])
+    o.append([[squares_valid[2]],1,'!'])
     o.append([[squares_valid[5],squares_valid[8]],5,'+'])
     o.append([[squares_valid[6],squares_valid[7]],4,'+'])
     printConfig(o)
@@ -133,6 +133,41 @@ def test_kenken3x3():
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists))
         E.add_constraint(col[i])
 
+
+
+    operationList = []
+    #operationDict = {}
+
+    #if (f'region[0][0]_{i}')
+
+
+    # Logic for checking arithmetic of regions - Not complete yet!!
+    for idx, region in enumerate(o):
+        print(region[0])
+        if len(region[0]) == 1:
+            operationList.append(Var(f'{region[0][0]}_{region[1]}'))
+            E.add_constraint(operationList[idx])
+        elif len(region[0]) == 2:
+            varList = []
+            for i in range(1,4):
+                for j in range(1,4):
+                    if (i+j == region[1]):
+                        varList.append(Var(f'{region[0][0]}_{i}'))
+                        varList.append(Var(f'{region[0][1]}_{j}'))
+
+                        #E.add_constraint((Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')).negate() | Var(f'group{idx}result_{i+j}'))
+                        #E.add_constraint(Var(f'group{idx}result_{i+j}').negate() | (Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')))
+            operationList.append(Var(f'group{idx}result_{region[1]}'))
+            #E.add_constraint(operationList[idx].negate() | (varList[0] & varList[1]) | (varList[2] & varList[3]))
+
+            #operationList.append("Hi")
+            E.add_constraint(operationList[idx])
+        elif len(region[0]) == 3:
+            operationList.append("5")
+            pass
+        elif len(region[0]) == 4:
+            operationList.append("5")
+            pass  
     return E
 
 def test_kenken5x5():
@@ -290,10 +325,6 @@ def test_kenken5x5():
         #E.add_constraint(col[i])
         E.add_constraint(one_exists & two_exists & three_exists & four_exists & five_exists)
 
-    """
-    Use discussion post answer here to model arithmetic: https://onq.queensu.ca/d2l/le/398978/discussions/threads/3985242/View
-    """
-
 
     return E
 
@@ -302,12 +333,13 @@ if __name__ == "__main__":
 
     T = test_kenken3x3()
     print("\n------Begin Tests------")
+    print(T.vars())
     print("\nSatisfiable: %s" % T.is_satisfiable())
     print("# Solutions: %d" % T.count_solutions()) # commented out because it hangs when testing kenken5x5
     sol = T.solve()
     sorted_sol = getTrueAtoms(sol)
     print("   Solution: %s" % sol)
-    print("   Sorted solution: %s" % sorted_sol)
+    print("   \nSorted solution: %s" % sorted_sol)
     displayBoard(sol, 3)
     print("\nVariable likelihoods (work in progress):")
     #for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):

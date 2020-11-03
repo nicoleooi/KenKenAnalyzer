@@ -7,7 +7,8 @@ The purpose of this project is to read a 5x5 Kenken board configuration and prov
     * For the board to be considered valid there must be **one and only one** viable solution. For a solution to be viable the rows and columns all must contain the numbers 1-5 without repeats, and the numbers in the "cages" must produce the arithmetic result using the operator specified for the cage. For the full rules to Kenken you can read more [here](https://www.puzzazz.com/how-to/kenken).
 2. The suggested difficulty for the board configuration.
 
-As of this version, all the developed code for the project can be found in run.py. One-hot encoding is used with booleans to represent the possible inputs of 1-5 in each of the kenken squares. The row and column constraints have been coded, and the team is currently working on incorperating the constraints for checking the arithmetic of each "cage" using logic.
+As of this version, all the developed code for the project can be found in run.py. One-hot encoding is used with booleans to represent the possible inputs of 1-5 in each of the kenken squares. The row and column constraints have been coded, and the team is currently working on incorperating the constraints for checking the arithmetic of each "cage" using logic. 
+*Note: the T.count_solutions() method was found to hang on the 5x5 board configuration, so we have also implemented a function that scales it back and checks on a 3x3 board configuration.
 
 The board configuration must be manually inputted, however the team is considering creating the ability to read the configuration from a txt file. The current board configuration inputted is shown below.
 
