@@ -82,6 +82,11 @@ def test_kenken3x3():
                 vals_list.append(Var(f'{charOffset}{j}'+'_'+f'{x}'))
             squares_values.append(vals_list)
     print(squares_values)
+    '''
+    o is a list representing the board
+    each item in the list is a region, each region is a list
+    each region is a list of 3 items: the squares in the region, the number it must evaluate to, operator
+    '''
     o = []
     o.append([[squares_valid[0],squares_valid[3]],3,'+'])
     o.append([[squares_valid[1],squares_valid[4]],5,'+'])
@@ -169,6 +174,53 @@ def test_kenken3x3():
             operationList.append("5")
             pass  
     return E
+
+'''
+def plus(region, squares_valid, squares_values):
+    #call if operator is a '+'
+    tgt = region[1]
+    members_idx = []
+    members = region[0]
+    for i in len(members):
+        tmp = members[i] #a0 = squares_valid[0] == 0, b2 = squares_valid[5] == 5
+        members_idx.append(squares_valid.index(tmp))
+    
+    for j in len(members_idx):
+        sum = 0
+        val = squares_values[members_idx[j]]
+        is_one = val[0]
+        is_two = val[1]
+        is_three = val[2]
+        if(is_one):
+            sum += 1
+        elif(is_two):
+            sum += 2
+        else:
+            sum += 3
+
+def mult(region, squares_valid, squares_values):
+    #call if operator is a '*'
+    tgt = region[1]
+    members_idx = []
+    members = region[0]
+    for i in len(members):
+        tmp = members[i] #a0 = squares_valid[0] == 0, b2 = squares_valid[5] == 5
+        members_idx.append(squares_valid.index(tmp))
+    
+    for j in len(members_idx):
+        sum = 1
+        val = squares_values[members_idx[j]]
+        is_one = val[0]
+        is_two = val[1]
+        is_three = val[2]
+        if(is_one):
+            sum *= 1
+        elif(is_two):
+            sum *= 2
+        else:
+            sum *= 3
+'''
+
 
 def test_kenken5x5():
     #row[i] << - >> (the row i contains the digits 1-5)
