@@ -5,6 +5,10 @@ from string import ascii_lowercase
 
 # Call your variables whatever you want
 
+class Square:
+    def _init_(is_valid, value):
+        self.is_valid = is_valid
+        self.value = value
 
 def getSquareVal(atom):
     """
@@ -175,7 +179,6 @@ def test_kenken3x3():
             pass  
     return E
 
-'''
 def plus(region, squares_valid, squares_values):
     #call if operator is a '+'
     tgt = region[1]
@@ -184,8 +187,8 @@ def plus(region, squares_valid, squares_values):
     for i in len(members):
         tmp = members[i] #a0 = squares_valid[0] == 0, b2 = squares_valid[5] == 5
         members_idx.append(squares_valid.index(tmp))
-    
-    for j in len(members_idx):
+    '''
+    for j in len(members):
         sum = 0
         val = squares_values[members_idx[j]]
         is_one = val[0]
@@ -195,8 +198,10 @@ def plus(region, squares_valid, squares_values):
             sum += 1
         elif(is_two):
             sum += 2
-        else:
+        elif(is_three):
             sum += 3
+    '''
+    #members is a list of the member square's values
 
 def mult(region, squares_valid, squares_values):
     #call if operator is a '*'
@@ -207,7 +212,7 @@ def mult(region, squares_valid, squares_values):
         tmp = members[i] #a0 = squares_valid[0] == 0, b2 = squares_valid[5] == 5
         members_idx.append(squares_valid.index(tmp))
     
-    for j in len(members_idx):
+    for j in len(members):
         sum = 1
         val = squares_values[members_idx[j]]
         is_one = val[0]
@@ -217,9 +222,8 @@ def mult(region, squares_valid, squares_values):
             sum *= 1
         elif(is_two):
             sum *= 2
-        else:
+        elif(is_three):
             sum *= 3
-'''
 
 
 def test_kenken5x5():
