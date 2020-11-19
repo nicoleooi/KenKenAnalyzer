@@ -6,9 +6,25 @@ from string import ascii_lowercase
 # Call your variables whatever you want
 
 class Square:
-    def _init_(is_valid, value):
+    def _init_(self,is_valid, value):
         self.is_valid = is_valid
         self.value = value
+
+    def get_val(self):
+        if(self.value.isnull()): #no values created yet
+            return -1
+        else:
+            return (self.value.index(True) + 1)
+
+class Region:
+    def _init_(self, members, rslt, operator, sat):
+        self.members = members
+        self.operator = operator
+        self.rslt = rslt
+        self.sat = sat
+
+    def get_len(self):
+        return len(self.members)
 
 def getSquareVal(atom):
     """
@@ -67,61 +83,55 @@ def test_kenken3x3():
         row.append(Var(f'row_{i}'))
         col.append(Var(f'col_{i}'))
 
-    squares_valid = []
-    for i in range(N): 
-        for j in range(N): 
-                charOffset = chr(ord('a')+i)
-                squares_valid.append(Var(f'{charOffset}{j}'))
-
-
-    squares_values = []
-    for i in range(N): #Columns
-        for j in range(N): #Rows
-            # Create a list for each square
-            vals_list = []
+    '''create board squares'''
+    board = []
+    for i in range(N):
+         for j in range(N): 
+             # Create boolean corresponding to if the value at the square is valid or not
+            charOffset = chr(ord('a')+i)
+            is_valid = Var(f'{charOffset}{j}')
+            values = []
             for x in range(1,N+1):
                 charOffset = chr(ord('a')+i)
-
                 # Create booleans in each list corresponding to if the square is 1,2,3
-                vals_list.append(Var(f'{charOffset}{j}'+'_'+f'{x}'))
-            squares_values.append(vals_list)
-    print(squares_values)
+                values.append(Var(f'{charOffset}{j}'+'_'+f'{x}'))
+            board.append(Square(is_valid, values))       
+
     '''
-    o is a list representing the board
-    each item in the list is a region, each region is a list
-    each region is a list of 3 items: the squares in the region, the number it must evaluate to, operator
+    o is a list of Region objects
     '''
     o = []
-    o.append([[squares_valid[0],squares_valid[3]],3,'+'])
-    o.append([[squares_valid[1],squares_valid[4]],5,'+'])
-    o.append([[squares_valid[2]],1,'!'])
-    o.append([[squares_valid[5],squares_valid[8]],5,'+'])
-    o.append([[squares_valid[6],squares_valid[7]],4,'+'])
+    o.append(Region([board[0],board[3]],3,'+', Var('region1')))
+    o.append(Region([board[1],board[4]],5,'+', Var('region2')))
+    o.append(Region([board[2]],1,'!', Var('region3')))
+    o.append(Region([board[5],board[8]],5,'+',Var('region4')))
+    o.append(Region([board[6],board[7]],4,'+',Var('region5')))
     printConfig(o)
 
-    for i in range(len(squares_values)):
+    for i in range(len(board)):
         #at each square, access the list for squares_values
         #true if the square value is equal to the specified val
-        is_one = (squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2])
-        is_two = (~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2])
-        is_three = (~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2])
+        sq = board[i]
+        is_one = (sq.value[0]& ~sq.value[1] & ~sq.value[2])
+        is_two = (~sq.value[0]& sq.value[1] & ~sq.value[2])
+        is_three = (~sq.value[0]& ~sq.value[1] & sq.value[2])
 
         #square is valid iff the square holds one of these values
-        E.add_constraint(iff(squares_valid[i],( is_one | is_two | is_three)))
-        E.add_constraint(squares_valid[i])
+        E.add_constraint(iff(sq.is_valid,( is_one | is_two | is_three)))
+        E.add_constraint(sq.is_valid)
 
-    for i in range(0,len(squares_values), N): #increment by 3
+    for i in range(0,len(board), N): #increment by 3
         # a row is valid iff it contains the numbers 1-5
         # Check combinations of squares_values[square of index 0-24][value]
-        one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2]) | 
-                    (squares_values[i+1][0]& ~squares_values[i+1][1] & ~squares_values[i+1][2]) | 
-                    (squares_values[i+2][0]& ~squares_values[i+2][1] & ~squares_values[i+2][2]))
-        two_exists = ((~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2]) |
-                    (~squares_values[i+1][0]& squares_values[i+1][1] & ~squares_values[i+1][2]) |
-                    (~squares_values[i+2][0]& squares_values[i+2][1] & ~squares_values[i+2][2]))
-        three_exists = ((~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2]) |
-                    (~squares_values[i+1][0]& ~squares_values[i+1][1] & squares_values[i+1][2]) |
-                    (~squares_values[i+2][0]& ~squares_values[i+2][1] & squares_values[i+2][2]))
+        one_exists = ((board[i].value[0]& ~board[i].value[1] & ~board[i].value[2]) | 
+                    (board[i+1].value[0]& ~board[i+1].value[1] & ~board[i+1].value[2]) | 
+                    (board[i+2].value[0]& ~board[i+2].value[1] & ~board[i+2].value[2]))
+        two_exists = ((~board[i].value[0]& board[i].value[1] & ~board[i].value[2]) |
+                    (~board[i+1].value[0]& board[i+1].value[1] & ~board[i+1].value[2]) |
+                    (~board[i+2].value[0]& board[i+2].value[1] & ~board[i+2].value[2]))
+        three_exists = ((~board[i].value[0]& ~board[i].value[1] & board[i].value[2]) |
+                    (~board[i+1].value[0]& ~board[i+1].value[1] & board[i+1].value[2]) |
+                    (~board[i+2].value[0]& ~board[i+2].value[1] & board[i+2].value[2]))
         
         E.add_constraint(iff(row[int(i/N)], one_exists & two_exists & three_exists))
         E.add_constraint(row[int(i/N)])
@@ -129,15 +139,15 @@ def test_kenken3x3():
 
     for i in range(N):
         # A column is valid iff it contains the numbers 1-5
-        one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2]) |
-                    (squares_values[i+N][0]& ~squares_values[i+N][1] & ~squares_values[i+N][2]) |
-                    (squares_values[i+N*2][0]& ~squares_values[i+N*2][1] & ~squares_values[i+N*2][2]))
-        two_exists = ((~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2]) |
-                    (~squares_values[i+N][0]& squares_values[i+N][1] & ~squares_values[i+N][2]) |
-                    (~squares_values[i+N*2][0]& squares_values[i+N*2][1] & ~squares_values[i+N*2][2]))
-        three_exists = ((~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2]) |
-                    (~squares_values[i+N][0]& ~squares_values[i+N][1] & squares_values[i+N][2]) |
-                    (~squares_values[i+N*2][0]& ~squares_values[i+N*2][1] & squares_values[i+N*2][2]))
+        one_exists = ((board[i].value[0]& ~board[i].value[1] & ~board[i].value[2]) |
+                    (board[i+N].value[0]& ~board[i+N].value[1] & ~board[i+N].value[2]) |
+                    (board[i+N*2].value[0]& ~board[i+N*2].value[1] & ~board[i+N*2].value[2]))
+        two_exists = ((~board[i].value[0]& board[i].value[1] & ~board[i].value[2]) |
+                    (~board[i+N].value[0]& board[i+N].value[1] & ~board[i+N].value[2]) |
+                    (~board[i+N*2].value[0]& board[i+N*2].value[1] & ~board[i+N*2].value[2]))
+        three_exists = ((~board[i].value[0]& ~board[i].value[1] & board[i].value[2]) |
+                    (~board[i+N].value[0]& ~board[i+N].value[1] & board[i+N].value[2]) |
+                    (~board[i+N*2].value[0]& ~board[i+N*2].value[1] & board[i+N*2].value[2]))
 
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists))
         E.add_constraint(col[i])
