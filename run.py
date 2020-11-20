@@ -1,4 +1,3 @@
-
 from nnf import Var
 from lib204 import Encoding
 from string import ascii_lowercase
@@ -159,7 +158,11 @@ def test_kenken(N):
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists))
         E.add_constraint(col[i])
 
-    '''Constraint: Region must result in Region.rslt when Region.operator is applied. Region.sat == True if this is satisfied'''
+    '''Constraint: Every region must be satisifed'''
+    for i in range(len(o)):
+        E.add_constraint(o[i].sat)
+    
+    '''Constraint: Every region can only be satisfied if the operator results in the result'''
 
     
     '''
@@ -199,7 +202,35 @@ def test_kenken(N):
     '''
     return E
 
+def add(region, N, E, x): 
+    ''' @param: region of type Region
+        @param: N is length of one side of grid, type int
+        @param: E is Encoding object, to add constraints to
+        @param: x is number of region, to keep Var names corresponding
+        called to add constraint to the region if the op is addition
+    '''
+    if(region.operator != '+'):
+        #wrong func was called, not an addition region
+        return -1
+    sq = region.members  
+    tgt = Var('region'+x+'_sum')
+
+    #tgt is true iff the board's values add up to tgt
+    #depends on length of region
+    vals = []
+    for i in range(len(sq)): #for each square
+        #make a list of list of values
+        vals.append(sq[i].value)
+    
+     
+
+    #sum[rslt] can only be satisfied if the region's members add to it
+    E.add_constraint(tgt, )
+    #region can only be satisfied if the sum == rslt
+    E.add_constraint(iff(region.sat,tgt))
+
 '''
+#this is wrong, summing must be integrated into the encoding
 def plus(region, squares_valid, squares_values):
     #call if operator is a '+'
     tgt = region[1]
