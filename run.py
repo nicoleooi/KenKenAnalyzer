@@ -193,6 +193,7 @@ def add(region, N, E, x):
                 if((i+j) == region.rslt):
                     #if they add up to the result, they're a valid combination for the constraint
                     E.add_constraint(iff(tgt, x[i-1] & y[j-1]))
+
     elif(len(sq == 3)):
         x = sq[0].value
         y = sq[1].value
@@ -204,56 +205,75 @@ def add(region, N, E, x):
                             #if they add up to the result, they're a valid combination for the constraint
                             E.add_constraint(iff(tgt, x[i-1] & y[j-1] & z[k-1]))
 
+    elif(len(sq == 4)):
+        w = sq[0].value
+        x = sq[1].value
+        y = sq[2].value
+        z = sq[3].value
+        for i in range(N+1): #represents the number held sq[0]
+            for j in range(N+1): #represents the number held in sq[1]
+                for k in range(N+1): #represents the number held in sq[2]
+                    for m in range(N+1): #represents the number held in sq[3]
+                        if((i+j+k+m) == region.rslt):
+                            #if they add up to the result, they're a valid combination for the constraint
+                            E.add_constraint(iff(tgt, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+
+def mult(region, N, E, x):
+    #region can only be satisfied if the sum == rslt
+    E.add_constraint(iff(region.sat,tgt))def add(region, N, E, x): 
+    ''' @param: region of type Region
+        @param: N is length of one side of grid, type int
+        @param: E is Encoding object, to add constraints to
+        @param: x is number of region, to keep Var names corresponding
+        called to add constraint to the region if the op is addition
+    '''
+    if(region.operator != '+'):
+        #wrong func was called, not an addition region
+        return -1
+
+    tgt = Var('region'+x+'_sum')
+
+    #tgt is true iff the board's values add up to tgt
+    #makeshift switch/case statement 
+    sq = region.members  
+    if(len(sq) == 1):
+        E.add_constraint(iff(tgt, sq[0].value[region.rslt-1]))
+    
+    elif(len(sq == 2)):
+        x = sq[0].value
+        y = sq[1].value
+        for i in range(N+1): #represents the number held sq[0]
+            for j in range(N+1): #represents the number held in sq[1]
+                if((i*j) == region.rslt):
+                    #if they add up to the result, they're a valid combination for the constraint
+                    E.add_constraint(iff(tgt, x[i-1] & y[j-1]))
+
+    elif(len(sq == 3)):
+        x = sq[0].value
+        y = sq[1].value
+        z = sq[2].value
+        for i in range(N+1): #represents the number held sq[0]
+            for j in range(N+1): #represents the number held in sq[1]
+                for k in range(N+1): #represents the number held in sq[2]
+                        if((i*j*k) == region.rslt):
+                            #if they add up to the result, they're a valid combination for the constraint
+                            E.add_constraint(iff(tgt, x[i-1] & y[j-1] & z[k-1]))
+
+    elif(len(sq == 4)):
+        w = sq[0].value
+        x = sq[1].value
+        y = sq[2].value
+        z = sq[3].value
+        for i in range(N+1): #represents the number held sq[0]
+            for j in range(N+1): #represents the number held in sq[1]
+                for k in range(N+1): #represents the number held in sq[2]
+                    for m in range(N+1): #represents the number held in sq[3]
+                        if((i*j*k*m) == region.rslt):
+                            #if they add up to the result, they're a valid combination for the constraint
+                            E.add_constraint(iff(tgt, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+
     #region can only be satisfied if the sum == rslt
     E.add_constraint(iff(region.sat,tgt))
-
-'''
-#this is wrong, summing must be integrated into the encoding
-def plus(region, squares_valid, squares_values):
-    #call if operator is a '+'
-    tgt = region[1]
-    members_idx = []
-    members = region[0]
-    for i in len(members):
-        tmp = members[i] #a0 = squares_valid[0] == 0, b2 = squares_valid[5] == 5
-        members_idx.append(squares_valid.index(tmp))
-
-    for j in len(members):
-        sum = 0
-        val = squares_values[members_idx[j]]
-        is_one = val[0]
-        is_two = val[1]
-        is_three = val[2]
-        if(is_one):
-            sum += 1
-        elif(is_two):
-            sum += 2
-        elif(is_three):
-
-    #members is a list of the member square's values
-
-def mult(region, squares_valid, squares_values):
-    #call if operator is a '*'
-    tgt = region[1]
-    members_idx = []
-    members = region[0]
-    for i in len(members):
-        tmp = members[i] #a0 = squares_valid[0] == 0, b2 = squares_valid[5] == 5
-        members_idx.append(squares_valid.index(tmp))
-    
-    for j in len(members):
-        sum = 1
-        val = squares_values[members_idx[j]]
-        is_one = val[0]
-        is_two = val[1]
-        is_three = val[2]
-        if(is_one):
-            sum *= 1
-        elif(is_two):
-            sum *= 2
-        elif(is_three):
-            sum *= 3
-'''
 
 if __name__ == "__main__":
 
