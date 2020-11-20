@@ -164,42 +164,6 @@ def test_kenken(N):
     
     '''Constraint: Every region can only be satisfied if the operator results in the result'''
 
-    
-    '''
-    operationList = []
-    #operationDict = {}
-
-    #if (f'region[0][0]_{i}')
-
-
-    # Logic for checking arithmetic of regions - Not complete yet!!
-    for idx, region in enumerate(o):
-        print(region[0])
-        if len(region[0]) == 1:
-            operationList.append(Var(f'{region[0][0]}_{region[1]}'))
-            E.add_constraint(operationList[idx])
-        elif len(region[0]) == 2:
-            varList = []
-            for i in range(1,4):
-                for j in range(1,4):
-                    if (i+j == region[1]):
-                        varList.append(Var(f'{region[0][0]}_{i}'))
-                        varList.append(Var(f'{region[0][1]}_{j}'))
-
-                        #E.add_constraint((Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')).negate() | Var(f'group{idx}result_{i+j}'))
-                        #E.add_constraint(Var(f'group{idx}result_{i+j}').negate() | (Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')))
-            operationList.append(Var(f'group{idx}result_{region[1]}'))
-            #E.add_constraint(operationList[idx].negate() | (varList[0] & varList[1]) | (varList[2] & varList[3]))
-
-            #operationList.append("Hi")
-            E.add_constraint(operationList[idx])
-        elif len(region[0]) == 3:
-            operationList.append("5")
-            pass
-        elif len(region[0]) == 4:
-            operationList.append("5")
-            pass  
-    '''
     return E
 
 def add(region, N, E, x): 
@@ -212,20 +176,34 @@ def add(region, N, E, x):
     if(region.operator != '+'):
         #wrong func was called, not an addition region
         return -1
-    sq = region.members  
+
     tgt = Var('region'+x+'_sum')
 
     #tgt is true iff the board's values add up to tgt
-    #depends on length of region
-    vals = []
-    for i in range(len(sq)): #for each square
-        #make a list of list of values
-        vals.append(sq[i].value)
+    #makeshift switch/case statement 
+    sq = region.members  
+    if(len(sq) == 1):
+        E.add_constraint(iff(tgt, sq[0].value[region.rslt-1]))
     
-     
+    elif(len(sq == 2)):
+        x = sq[0].value
+        y = sq[1].value
+        for i in range(N+1): #represents the number held sq[0]
+            for j in range(N+1): #represents the number held in sq[1]
+                if((i+j) == region.rslt):
+                    #if they add up to the result, they're a valid combination for the constraint
+                    E.add_constraint(iff(tgt, x[i-1] & y[j-1]))
+    elif(len(sq == 3)):
+        x = sq[0].value
+        y = sq[1].value
+        z = sq[2].value
+        for i in range(N+1): #represents the number held sq[0]
+            for j in range(N+1): #represents the number held in sq[1]
+                for k in range(N+1): #represents the number held in sq[2]
+                        if((i+j+k) == region.rslt):
+                            #if they add up to the result, they're a valid combination for the constraint
+                            E.add_constraint(iff(tgt, x[i-1] & y[j-1] & z[k-1]))
 
-    #sum[rslt] can only be satisfied if the region's members add to it
-    E.add_constraint(tgt, )
     #region can only be satisfied if the sum == rslt
     E.add_constraint(iff(region.sat,tgt))
 
