@@ -218,9 +218,10 @@ def add(region, N, E, x):
                             #if they add up to the result, they're a valid combination for the constraint
                             E.add_constraint(iff(tgt, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
 
-def mult(region, N, E, x):
     #region can only be satisfied if the sum == rslt
-    E.add_constraint(iff(region.sat,tgt))def add(region, N, E, x): 
+    E.add_constraint(iff(region.sat,tgt))
+
+def mult(region, N, E, x):
     ''' @param: region of type Region
         @param: N is length of one side of grid, type int
         @param: E is Encoding object, to add constraints to
