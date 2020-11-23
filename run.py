@@ -159,7 +159,7 @@ def test_kenken(N):
         E.add_constraint(col[i])
 
     '''
-    Defining functions for each operator'
+    Defining functions for each operator
     Constraint: Every region can only be satisfied if the operator results in the result
     '''
 
@@ -168,13 +168,12 @@ def test_kenken(N):
         @param: region of type Region
         called to add constraint to the region if the op is addition
         '''
-        if(region.operator != '+'):
-            #wrong func was called, not an addition region
-            return -1
-
+        #everything in the string must be relative to the region
+        statements = []
         sq = region.members  
         if(len(sq) == 1):
-            E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+            #E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+            statements.append('sq[0].value[region.rslt-1]')
         
         elif(len(sq) == 2):
             x = sq[0].value
@@ -183,7 +182,8 @@ def test_kenken(N):
                 for j in range(N+1): #represents the number held in sq[1]
                     if((i+j) == region.rslt):
                         #if they add up to the result, they're a valid combination for the constraint
-                        E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+                        #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+                        statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1])')
 
         elif(len(sq) == 3):
             x = sq[0].value
@@ -194,7 +194,8 @@ def test_kenken(N):
                     for k in range(N+1): #represents the number held in sq[2]
                             if((i+j+k) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
-                                E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+                                #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1])')
 
         elif(len(sq) == 4):
             w = sq[0].value
@@ -207,19 +208,36 @@ def test_kenken(N):
                         for m in range(N+1): #represents the number held in sq[3]
                             if((i+j+k+m) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
-                                E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+                                #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1] & sq[3].value['+m+'-1])')
+
+        eval_statement = ''
+        i = 0
+        #skip the last element
+        while(i < len(statements)):
+            if(i == 0):
+                eval_statement = '(' + statements[i]
+                i += 1
+                continue
+            else:
+                eval_statement += (' | ' + statements[i])
+
+        eval_statement += ')'
+
+        #evaluate code below
+        E.add_constraint(iff(region.sat, eval(eval_statement)))
+
     def mult(region): 
         ''' 
         @param: region of type Region
         called to add constraint to the region if the op is addition
         '''
-        if(region.operator != 'x'):
-            #wrong func was called, not an addition region
-            return -1
-
+        #everything in the string must be relative to the region
+        statements = []
         sq = region.members  
         if(len(sq) == 1):
-            E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+            #E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+            statements.append('sq[0].value[region.rslt-1]')
         
         elif(len(sq) == 2):
             x = sq[0].value
@@ -228,7 +246,8 @@ def test_kenken(N):
                 for j in range(N+1): #represents the number held in sq[1]
                     if((i*j) == region.rslt):
                         #if they add up to the result, they're a valid combination for the constraint
-                        E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+                        #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+                        statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1])')
 
         elif(len(sq) == 3):
             x = sq[0].value
@@ -239,7 +258,8 @@ def test_kenken(N):
                     for k in range(N+1): #represents the number held in sq[2]
                             if((i*j*k) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
-                                E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+                                #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1])')
 
         elif(len(sq) == 4):
             w = sq[0].value
@@ -252,7 +272,24 @@ def test_kenken(N):
                         for m in range(N+1): #represents the number held in sq[3]
                             if((i*j*k*m) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
-                                E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+                                #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1] & sq[3].value['+m+'-1])')
+
+        eval_statement = ''
+        i = 0
+        #skip the last element
+        while(i < len(statements)):
+            if(i == 0):
+                eval_statement = '('+statements[i]
+                i += 1
+                continue
+            else:
+                eval_statement += (' | ' + statements[i])
+
+        eval_statement += ')'
+
+        #evaluate code below
+        E.add_constraint(iff(region.sat, eval(eval_statement)))
 
     '''Constraint: Every region must be satisifed'''
     for i in range(len(o)):
