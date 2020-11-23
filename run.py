@@ -158,123 +158,111 @@ def test_kenken(N):
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists))
         E.add_constraint(col[i])
 
+    '''
+    Defining functions for each operator'
+    Constraint: Every region can only be satisfied if the operator results in the result
+    '''
+
+    def add(region): 
+        ''' 
+        @param: region of type Region
+        called to add constraint to the region if the op is addition
+        '''
+        if(region.operator != '+'):
+            #wrong func was called, not an addition region
+            return -1
+
+        sq = region.members  
+        if(len(sq) == 1):
+            E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+        
+        elif(len(sq) == 2):
+            x = sq[0].value
+            y = sq[1].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    if((i+j) == region.rslt):
+                        #if they add up to the result, they're a valid combination for the constraint
+                        E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+
+        elif(len(sq) == 3):
+            x = sq[0].value
+            y = sq[1].value
+            z = sq[2].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                            if((i+j+k) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+
+        elif(len(sq) == 4):
+            w = sq[0].value
+            x = sq[1].value
+            y = sq[2].value
+            z = sq[3].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                        for m in range(N+1): #represents the number held in sq[3]
+                            if((i+j+k+m) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+    def mult(region): 
+        ''' 
+        @param: region of type Region
+        called to add constraint to the region if the op is addition
+        '''
+        if(region.operator != 'x'):
+            #wrong func was called, not an addition region
+            return -1
+
+        sq = region.members  
+        if(len(sq) == 1):
+            E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+        
+        elif(len(sq) == 2):
+            x = sq[0].value
+            y = sq[1].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    if((i*j) == region.rslt):
+                        #if they add up to the result, they're a valid combination for the constraint
+                        E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+
+        elif(len(sq) == 3):
+            x = sq[0].value
+            y = sq[1].value
+            z = sq[2].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                            if((i*j*k) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+
+        elif(len(sq) == 4):
+            w = sq[0].value
+            x = sq[1].value
+            y = sq[2].value
+            z = sq[3].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                        for m in range(N+1): #represents the number held in sq[3]
+                            if((i*j*k*m) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+
     '''Constraint: Every region must be satisifed'''
     for i in range(len(o)):
+        if(o[i].operator == '+'):
+            add(o[i])
+        elif(o[i].operator == 'x'):
+            mult(o[i])
         E.add_constraint(o[i].sat)
     
-    '''Constraint: Every region can only be satisfied if the operator results in the result'''
-
     return E
-
-def add(region, N, E, x): 
-    ''' @param: region of type Region
-        @param: N is length of one side of grid, type int
-        @param: E is Encoding object, to add constraints to
-        @param: x is number of region, to keep Var names corresponding
-        called to add constraint to the region if the op is addition
-    '''
-    if(region.operator != '+'):
-        #wrong func was called, not an addition region
-        return -1
-
-    tgt = Var('region'+x+'_sum')
-
-    #tgt is true iff the board's values add up to tgt
-    #makeshift switch/case statement 
-    sq = region.members  
-    if(len(sq) == 1):
-        E.add_constraint(iff(tgt, sq[0].value[region.rslt-1]))
-    
-    elif(len(sq == 2)):
-        x = sq[0].value
-        y = sq[1].value
-        for i in range(N+1): #represents the number held sq[0]
-            for j in range(N+1): #represents the number held in sq[1]
-                if((i+j) == region.rslt):
-                    #if they add up to the result, they're a valid combination for the constraint
-                    E.add_constraint(iff(tgt, x[i-1] & y[j-1]))
-
-    elif(len(sq == 3)):
-        x = sq[0].value
-        y = sq[1].value
-        z = sq[2].value
-        for i in range(N+1): #represents the number held sq[0]
-            for j in range(N+1): #represents the number held in sq[1]
-                for k in range(N+1): #represents the number held in sq[2]
-                        if((i+j+k) == region.rslt):
-                            #if they add up to the result, they're a valid combination for the constraint
-                            E.add_constraint(iff(tgt, x[i-1] & y[j-1] & z[k-1]))
-
-    elif(len(sq == 4)):
-        w = sq[0].value
-        x = sq[1].value
-        y = sq[2].value
-        z = sq[3].value
-        for i in range(N+1): #represents the number held sq[0]
-            for j in range(N+1): #represents the number held in sq[1]
-                for k in range(N+1): #represents the number held in sq[2]
-                    for m in range(N+1): #represents the number held in sq[3]
-                        if((i+j+k+m) == region.rslt):
-                            #if they add up to the result, they're a valid combination for the constraint
-                            E.add_constraint(iff(tgt, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
-
-    #region can only be satisfied if the sum == rslt
-    E.add_constraint(iff(region.sat,tgt))
-
-def mult(region, N, E, x):
-    ''' @param: region of type Region
-        @param: N is length of one side of grid, type int
-        @param: E is Encoding object, to add constraints to
-        @param: x is number of region, to keep Var names corresponding
-        called to add constraint to the region if the op is addition
-    '''
-    if(region.operator != '+'):
-        #wrong func was called, not an addition region
-        return -1
-
-    tgt = Var('region'+x+'_sum')
-
-    #tgt is true iff the board's values add up to tgt
-    #makeshift switch/case statement 
-    sq = region.members  
-    if(len(sq) == 1):
-        E.add_constraint(iff(tgt, sq[0].value[region.rslt-1]))
-    
-    elif(len(sq == 2)):
-        x = sq[0].value
-        y = sq[1].value
-        for i in range(N+1): #represents the number held sq[0]
-            for j in range(N+1): #represents the number held in sq[1]
-                if((i*j) == region.rslt):
-                    #if they add up to the result, they're a valid combination for the constraint
-                    E.add_constraint(iff(tgt, x[i-1] & y[j-1]))
-
-    elif(len(sq == 3)):
-        x = sq[0].value
-        y = sq[1].value
-        z = sq[2].value
-        for i in range(N+1): #represents the number held sq[0]
-            for j in range(N+1): #represents the number held in sq[1]
-                for k in range(N+1): #represents the number held in sq[2]
-                        if((i*j*k) == region.rslt):
-                            #if they add up to the result, they're a valid combination for the constraint
-                            E.add_constraint(iff(tgt, x[i-1] & y[j-1] & z[k-1]))
-
-    elif(len(sq == 4)):
-        w = sq[0].value
-        x = sq[1].value
-        y = sq[2].value
-        z = sq[3].value
-        for i in range(N+1): #represents the number held sq[0]
-            for j in range(N+1): #represents the number held in sq[1]
-                for k in range(N+1): #represents the number held in sq[2]
-                    for m in range(N+1): #represents the number held in sq[3]
-                        if((i*j*k*m) == region.rslt):
-                            #if they add up to the result, they're a valid combination for the constraint
-                            E.add_constraint(iff(tgt, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
-
-    #region can only be satisfied if the sum == rslt
-    E.add_constraint(iff(region.sat,tgt))
 
 if __name__ == "__main__":
 
