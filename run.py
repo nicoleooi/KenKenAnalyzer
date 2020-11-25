@@ -1,10 +1,35 @@
-
 from nnf import Var
 from lib204 import Encoding
 from string import ascii_lowercase
+import numpy as np
+'''
+Finished constraints:
+    - row and column
+    - must be a valid number from 1-N
+TO DO constraints:
+    - must evaluate to the region's constraints
+'''
 
-# Call your variables whatever you want
+class Square:
+    def __init__(self,is_valid, value):
+        self.is_valid = is_valid
+        self.value = value
 
+    def get_val(self):
+        if(self.value.isnull()): #no values created yet
+            return -1
+        else:
+            return (self.value.index(True) + 1)
+
+class Region:
+    def __init__(self, members, rslt, operator, sat):
+        self.members = members
+        self.operator = operator
+        self.rslt = rslt
+        self.sat = sat
+
+    def get_len(self):
+        return len(self.members)
 
 def getSquareVal(atom):
     """
@@ -54,284 +79,308 @@ def printConfig(boardConfig):
         print(region)
     print("* Note: ! indicates singular value in the specified box")
 
-def test_kenken3x3():
+#dynamic test of kenken, pass in the dimension of the grid
+def test_kenken(N): 
     E = Encoding()
-    N = 3
+    '''Create row and column propositions'''
     row = []
     col = []
     for i in range(N):
         row.append(Var(f'row_{i}'))
         col.append(Var(f'col_{i}'))
 
-    squares_valid = []
-    for i in range(N): 
-        for j in range(N): 
-                charOffset = chr(ord('a')+i)
-                squares_valid.append(Var(f'{charOffset}{j}'))
-
-
-    squares_values = []
-    for i in range(N): #Columns
-        for j in range(N): #Rows
-            # Create a list for each square
-            vals_list = []
+    '''Create board squares'''
+    board = []
+    for i in range(N):
+         for j in range(N): 
+             # Create boolean corresponding to if the value at the square is valid or not
+            charOffset = chr(ord('a')+i)
+            is_valid = Var(f'{charOffset}{j}')
+            values = []
             for x in range(1,N+1):
                 charOffset = chr(ord('a')+i)
-
                 # Create booleans in each list corresponding to if the square is 1,2,3
-                vals_list.append(Var(f'{charOffset}{j}'+'_'+f'{x}'))
-            squares_values.append(vals_list)
-    print(squares_values)
+                values.append(Var(f'{charOffset}{j}'+'_'+f'{x}'))
+            board.append(Square(is_valid, values))       
+
+    '''
+    Create Regions, o is a list of Regions
+    '''
     o = []
-    o.append([[squares_valid[0],squares_valid[3]],3,'+'])
-    o.append([[squares_valid[1],squares_valid[4]],5,'+'])
-    o.append([[squares_valid[2]],1,'!'])
-    o.append([[squares_valid[5],squares_valid[8]],5,'+'])
-    o.append([[squares_valid[6],squares_valid[7]],4,'+'])
+    o.append(Region([board[0],board[3]],3,'+', Var('region1')))
+    o.append(Region([board[1],board[4]],5,'+', Var('region2')))
+    o.append(Region([board[2]],1,'!', Var('region3')))
+    o.append(Region([board[5],board[8]],5,'+',Var('region4')))
+    o.append(Region([board[6],board[7]],4,'+',Var('region5')))
     printConfig(o)
 
-    for i in range(len(squares_values)):
+    ''' Constraint: Numbers on board must be from 1-N'''
+    for i in range(len(board)):
         #at each square, access the list for squares_values
         #true if the square value is equal to the specified val
-        is_one = (squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2])
-        is_two = (~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2])
-        is_three = (~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2])
+        sq = board[i]
+        is_one = (sq.value[0]& ~sq.value[1] & ~sq.value[2])
+        is_two = (~sq.value[0]& sq.value[1] & ~sq.value[2])
+        is_three = (~sq.value[0]& ~sq.value[1] & sq.value[2])
 
         #square is valid iff the square holds one of these values
-        E.add_constraint(iff(squares_valid[i],( is_one | is_two | is_three)))
-        E.add_constraint(squares_valid[i])
+        E.add_constraint(iff(sq.is_valid,( is_one | is_two | is_three)))
+        E.add_constraint(sq.is_valid)
 
-    for i in range(0,len(squares_values), N): #increment by 3
-        # a row is valid iff it contains the numbers 1-5
-        # Check combinations of squares_values[square of index 0-24][value]
-        one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2]) | 
-                    (squares_values[i+1][0]& ~squares_values[i+1][1] & ~squares_values[i+1][2]) | 
-                    (squares_values[i+2][0]& ~squares_values[i+2][1] & ~squares_values[i+2][2]))
-        two_exists = ((~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2]) |
-                    (~squares_values[i+1][0]& squares_values[i+1][1] & ~squares_values[i+1][2]) |
-                    (~squares_values[i+2][0]& squares_values[i+2][1] & ~squares_values[i+2][2]))
-        three_exists = ((~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2]) |
-                    (~squares_values[i+1][0]& ~squares_values[i+1][1] & squares_values[i+1][2]) |
-                    (~squares_values[i+2][0]& ~squares_values[i+2][1] & squares_values[i+2][2]))
+    ''' Constraint: Row must contain EVERY number from 1-N, with no repeats'''
+    for i in range(0,len(board), N): 
+        one_exists = ((board[i].value[0]& ~board[i].value[1] & ~board[i].value[2]) | 
+                    (board[i+1].value[0]& ~board[i+1].value[1] & ~board[i+1].value[2]) | 
+                    (board[i+2].value[0]& ~board[i+2].value[1] & ~board[i+2].value[2]))
+        two_exists = ((~board[i].value[0]& board[i].value[1] & ~board[i].value[2]) |
+                    (~board[i+1].value[0]& board[i+1].value[1] & ~board[i+1].value[2]) |
+                    (~board[i+2].value[0]& board[i+2].value[1] & ~board[i+2].value[2]))
+        three_exists = ((~board[i].value[0]& ~board[i].value[1] & board[i].value[2]) |
+                    (~board[i+1].value[0]& ~board[i+1].value[1] & board[i+1].value[2]) |
+                    (~board[i+2].value[0]& ~board[i+2].value[1] & board[i+2].value[2]))
         
         E.add_constraint(iff(row[int(i/N)], one_exists & two_exists & three_exists))
         E.add_constraint(row[int(i/N)])
 
-
+    ''' Constraint: Col must contain EVERY number from 1-N, with no repeats'''
     for i in range(N):
         # A column is valid iff it contains the numbers 1-5
-        one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2]) |
-                    (squares_values[i+N][0]& ~squares_values[i+N][1] & ~squares_values[i+N][2]) |
-                    (squares_values[i+N*2][0]& ~squares_values[i+N*2][1] & ~squares_values[i+N*2][2]))
-        two_exists = ((~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2]) |
-                    (~squares_values[i+N][0]& squares_values[i+N][1] & ~squares_values[i+N][2]) |
-                    (~squares_values[i+N*2][0]& squares_values[i+N*2][1] & ~squares_values[i+N*2][2]))
-        three_exists = ((~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2]) |
-                    (~squares_values[i+N][0]& ~squares_values[i+N][1] & squares_values[i+N][2]) |
-                    (~squares_values[i+N*2][0]& ~squares_values[i+N*2][1] & squares_values[i+N*2][2]))
+        one_exists = ((board[i].value[0]& ~board[i].value[1] & ~board[i].value[2]) |
+                    (board[i+N].value[0]& ~board[i+N].value[1] & ~board[i+N].value[2]) |
+                    (board[i+N*2].value[0]& ~board[i+N*2].value[1] & ~board[i+N*2].value[2]))
+        two_exists = ((~board[i].value[0]& board[i].value[1] & ~board[i].value[2]) |
+                    (~board[i+N].value[0]& board[i+N].value[1] & ~board[i+N].value[2]) |
+                    (~board[i+N*2].value[0]& board[i+N*2].value[1] & ~board[i+N*2].value[2]))
+        three_exists = ((~board[i].value[0]& ~board[i].value[1] & board[i].value[2]) |
+                    (~board[i+N].value[0]& ~board[i+N].value[1] & board[i+N].value[2]) |
+                    (~board[i+N*2].value[0]& ~board[i+N*2].value[1] & board[i+N*2].value[2]))
 
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists))
         E.add_constraint(col[i])
 
+    '''
+    Defining functions for each operator
+    Constraint: Every region can only be satisfied if the operator results in the result
+    '''
 
-
-    operationList = []
-    #operationDict = {}
-
-    #if (f'region[0][0]_{i}')
-
-
-    # Logic for checking arithmetic of regions - Not complete yet!!
-    for idx, region in enumerate(o):
-        print(region[0])
-        if len(region[0]) == 1:
-            operationList.append(Var(f'{region[0][0]}_{region[1]}'))
-            E.add_constraint(operationList[idx])
-        elif len(region[0]) == 2:
-            varList = []
-            for i in range(1,4):
-                for j in range(1,4):
-                    if (i+j == region[1]):
-                        varList.append(Var(f'{region[0][0]}_{i}'))
-                        varList.append(Var(f'{region[0][1]}_{j}'))
-
-                        #E.add_constraint((Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')).negate() | Var(f'group{idx}result_{i+j}'))
-                        #E.add_constraint(Var(f'group{idx}result_{i+j}').negate() | (Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')))
-            operationList.append(Var(f'group{idx}result_{region[1]}'))
-            #E.add_constraint(operationList[idx].negate() | (varList[0] & varList[1]) | (varList[2] & varList[3]))
-
-            #operationList.append("Hi")
-            E.add_constraint(operationList[idx])
-        elif len(region[0]) == 3:
-            operationList.append("5")
-            pass
-        elif len(region[0]) == 4:
-            operationList.append("5")
-            pass  
-    return E
-
-def test_kenken5x5():
-    #row[i] << - >> (the row i contains the digits 1-5)
-    #col[i] << - >> (the col i contains the digits 1-5)
-    #o[i]   << - >> (when the the region i uses the operator in o[i][2] on the elements in o[i][0] to create an output equal to o[i][1])
-    #squares_valid[i] << - >> (true if the corresponding value at squares_value[i] is the one hot encoding of 1 to 5. MSB corresponds to greatest index)
-    #squares_value[i][0-4] <<->> (outputs of model, each i corresponds to a square on the kenken board and 0-4 correspond to the LSB to MSB of one hot encoding)
-    # Idea for this -> we may need to apply binary arithmetic logic structures? If we can use operations rather than purely logic we would avoid this. I need to finish the video first.
-
-    # To qualify as a "good" kenken board there should only be one solution to the puzzle.
-    # Time taken or steps required to solve the board can be used in approximating the "difficulty"
-
-    E = Encoding()
-    row = []
-    col = []
-    N = 5
-
-    # make row and column lists
-    # row i is true if the row has all the required numbers
-    # col i is true if the col has all the required numbers
-    """
-    for i in range(N):
-        row.append(Var(f'row_{i}')) # removed this as aux variables temporarily to attempt to speed up solving time
-        col.append(Var(f'col_{i}'))
-    """
-    for i in range(N):
-        row.append(f'row_{i}')
-        col.append(f'col_{i}')
-
-
-    print(row)
-    print(col)
-
-    # create squares a0-e4 as nnf Variables
-    # each row is from a to e
-    # each col is from 0 to 4
-    # each variable in squares_valid is a variable indicating if it represents an acceptable number (1-5)
-    squares_valid = []
-    for i in range(N): 
-        for j in range(N): 
-                charOffset = chr(ord('a')+i)
-                squares_valid.append(f'{charOffset}{j}') #removed valid square aux variable temporarily
-
-
-    # should find a way to categorize the squares into regions automatically given a config text file ... 
-    # in the meantime we will do it manually
-    o = []
-    o.append([[squares_valid[0],squares_valid[1],squares_valid[5],squares_valid[6]],14,'+'])
-    o.append([[squares_valid[2],squares_valid[7]],3,'-'])
-    o.append([[squares_valid[3], squares_valid[4]],4,'/'])
-    o.append([[squares_valid[8],squares_valid[9]],2,'-'])
-    o.append([[squares_valid[10],squares_valid[11]],2,'-'])
-    o.append([[squares_valid[12],squares_valid[17],squares_valid[18],squares_valid[23]],40,'*'])
-    o.append([[squares_valid[13],squares_valid[14],squares_valid[19]],9,'+'])
-    o.append([[squares_valid[15],squares_valid[20]],2,'/'])
-    o.append([[squares_valid[16],squares_valid[21],squares_valid[22]],12,"*"])
-    o.append([[squares_valid[24]],5,'!'])
-    printConfig(o)
-
-    squares_values = []
-    for i in range(N): #Columns
-        for j in range(N): #Rows
-            # Create a list for each square
-            vals_list = []
-            for x in range(1,N+1):
-                charOffset = chr(ord('a')+i)
-
-                # Create booleans in each list corresponding to if the square is 1,2,3,4, or 5
-                vals_list.append(Var(f'{charOffset}{j}'+'_'+f'{x}'))
-            squares_values.append(vals_list)
-    print(squares_values)
-
-    #constraint for valid squares 
-    for i in range(len(squares_values)):
-        #at each square, access the list for squares_values
-        #true if the square value is equal to the specified val
-        is_one = (squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4])
-        is_two = (~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4])
-        is_three = (~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4])
-        is_four = (~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & squares_values[i][3] & ~squares_values[i][4])
-        is_five = (~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & squares_values[i][4])
-
-        # Square is valid iff the square holds one of these values
-        #E.add_constraint(iff(squares_valid[i], ( is_one | is_two | is_three | is_four | is_five )) )
-        #E.add_constraint(squares_valid[i])
-        E.add_constraint(( is_one | is_two | is_three | is_four | is_five )) #Temporarily removed auxiliary variables in attempt to reduce solving time
+    def add(region): 
+        ''' 
+        @param: region of type Region
+        called to add constraint to the region if the op is addition
+        '''
+        #everything in the string must be relative to the region
+        statements = np.array([])
+        sq = region.members  
+        if(len(sq) == 1):
+            #E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+            statements.append('sq[0].value[region.rslt-1]')
         
-                    
-    # Constraint for valid rows
-    for i in range(0,len(squares_values), 5): #increment by 5
-        # a row is valid iff it contains the numbers 1-5
-        # Check combinations of squares_values[square of index 0-24][value]
-        one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
-                    (squares_values[i+1][0]& ~squares_values[i+1][1] & ~squares_values[i+1][2] & ~squares_values[i+1][3] & ~squares_values[i+1][4]) |
-                    (squares_values[i+2][0]& ~squares_values[i+2][1] & ~squares_values[i+2][2] & ~squares_values[i+2][3] & ~squares_values[i+2][4]) |
-                    (squares_values[i+3][0]& ~squares_values[i+3][1] & ~squares_values[i+3][2] & ~squares_values[i+3][3] & ~squares_values[i+3][4]) |
-                    (squares_values[i+4][0]& ~squares_values[i+4][1] & ~squares_values[i+4][2] & ~squares_values[i+4][3] & ~squares_values[i+4][4]))
-        two_exists = ((~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
-                    (~squares_values[i+1][0]& squares_values[i+1][1] & ~squares_values[i+1][2] & ~squares_values[i+1][3] & ~squares_values[i+1][4]) |
-                    (~squares_values[i+2][0]& squares_values[i+2][1] & ~squares_values[i+2][2] & ~squares_values[i+2][3] & ~squares_values[i+2][4]) |
-                    (~squares_values[i+3][0]& squares_values[i+3][1] & ~squares_values[i+3][2] & ~squares_values[i+3][3] & ~squares_values[i+3][4]) |
-                    (~squares_values[i+4][0]& squares_values[i+4][1] & ~squares_values[i+4][2] & ~squares_values[i+4][3] & ~squares_values[i+4][4]))
-        three_exists = ((~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
-                    (~squares_values[i+1][0]& ~squares_values[i+1][1] & squares_values[i+1][2] & ~squares_values[i+1][3] & ~squares_values[i+1][4]) |
-                    (~squares_values[i+2][0]& ~squares_values[i+2][1] & squares_values[i+2][2] & ~squares_values[i+2][3] & ~squares_values[i+2][4]) |
-                    (~squares_values[i+3][0]& ~squares_values[i+3][1] & squares_values[i+3][2] & ~squares_values[i+3][3] & ~squares_values[i+3][4]) |
-                    (~squares_values[i+4][0]& ~squares_values[i+4][1] & squares_values[i+4][2] & ~squares_values[i+4][3] & ~squares_values[i+4][4]))
-        four_exists = ((~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & squares_values[i][3] & ~squares_values[i][4]) |
-                    (~squares_values[i+1][0]& ~squares_values[i+1][1] & ~squares_values[i+1][2] & squares_values[i+1][3] & ~squares_values[i+1][4]) |
-                    (~squares_values[i+2][0]& ~squares_values[i+2][1] & ~squares_values[i+2][2] & squares_values[i+2][3] & ~squares_values[i+2][4]) |
-                    (~squares_values[i+3][0]& ~squares_values[i+3][1] & ~squares_values[i+3][2] & squares_values[i+3][3] & ~squares_values[i+3][4]) |
-                    (~squares_values[i+4][0]& ~squares_values[i+4][1] & ~squares_values[i+4][2] & squares_values[i+4][3] & ~squares_values[i+4][4]))
-        five_exists = ((~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & squares_values[i][4]) |
-                    (~squares_values[i+1][0]& ~squares_values[i+1][1] & ~squares_values[i+1][2] & ~squares_values[i+1][3] & squares_values[i+1][4]) |
-                    (~squares_values[i+2][0]& ~squares_values[i+2][1] & ~squares_values[i+2][2] & ~squares_values[i+2][3] & squares_values[i+2][4]) |
-                    (~squares_values[i+3][0]& ~squares_values[i+3][1] & ~squares_values[i+3][2] & ~squares_values[i+3][3] & squares_values[i+3][4]) |
-                    (~squares_values[i+4][0]& ~squares_values[i+4][1] & ~squares_values[i+4][2] & ~squares_values[i+4][3] & squares_values[i+4][4]))
+        elif(len(sq) == 2):
+            x = sq[0].value
+            y = sq[1].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    if((i+j) == region.rslt):
+                        #if they add up to the result, they're a valid combination for the constraint
+                        #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+                        statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
+
+        elif(len(sq) == 3):
+            x = sq[0].value
+            y = sq[1].value
+            z = sq[2].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                            if((i+j+k) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1])')
+
+        elif(len(sq) == 4):
+            w = sq[0].value
+            x = sq[1].value
+            y = sq[2].value
+            z = sq[3].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                        for m in range(N+1): #represents the number held in sq[3]
+                            if((i+j+k+m) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1] & sq[3].value['+str(m)+'-1])')
+
+        eval_statement = ''
+        i = 0
+        #skip the last element
+        while(i < len(statements)):
+            if(i == 0):
+                eval_statement = '(' + statements[i]
+                i += 1
+                continue
+            else:
+                eval_statement += (' | ' + statements[i])
+
+        eval_statement += ')'
+
+        #evaluate code below
+        E.add_constraint(iff(region.sat, eval(eval_statement)))
+
+    def mult(region): 
+        ''' 
+        @param: region of type Region
+        called to add constraint to the region if the op is addition
+        '''
+        #everything in the string must be relative to the region
+        statements = []
+        sq = region.members  
+        if(len(sq) == 1):
+            #E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+            statements.append('sq[0].value[region.rslt-1]')
         
-        # Add constraint to to row[0-4] auxilliary variables to check validity of rows
-        #E.add_constraint(iff(row[int(i/5)], one_exists & two_exists & three_exists & four_exists & five_exists))
-        #E.add_constraint(row[int(i/5)])
-        E.add_constraint(one_exists & two_exists & three_exists & four_exists & five_exists)
+        elif(len(sq) == 2):
+            x = sq[0].value
+            y = sq[1].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    if((i*j) == region.rslt):
+                        #if they add up to the result, they're a valid combination for the constraint
+                        #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+                        statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
 
-    # Constraint for valid cols
-    for i in range(5):
-        # A column is valid iff it contains the numbers 1-5
-        one_exists = ((squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
-                    (squares_values[i+5][0]& ~squares_values[i+5][1] & ~squares_values[i+5][2] & ~squares_values[i+5][3] & ~squares_values[i+5][4]) |
-                    (squares_values[i+10][0]& ~squares_values[i+10][1] & ~squares_values[i+10][2] & ~squares_values[i+10][3] & ~squares_values[i+10][4]) |
-                    (squares_values[i+15][0]& ~squares_values[i+15][1] & ~squares_values[i+15][2] & ~squares_values[i+15][3] & ~squares_values[i+15][4]) |
-                    (squares_values[i+20][0]& ~squares_values[i+20][1] & ~squares_values[i+20][2] & ~squares_values[i+20][3] & ~squares_values[i+20][4]))
-        two_exists = ((~squares_values[i][0]& squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
-                    (~squares_values[i+5][0]& squares_values[i+5][1] & ~squares_values[i+5][2] & ~squares_values[i+5][3] & ~squares_values[i+5][4]) |
-                    (~squares_values[i+10][0]& squares_values[i+10][1] & ~squares_values[i+10][2] & ~squares_values[i+10][3] & ~squares_values[i+10][4]) |
-                    (~squares_values[i+15][0]& squares_values[i+15][1] & ~squares_values[i+15][2] & ~squares_values[i+15][3] & ~squares_values[i+15][4]) |
-                    (~squares_values[i+20][0]& squares_values[i+20][1] & ~squares_values[i+20][2] & ~squares_values[i+20][3] & ~squares_values[i+20][4]))
-        three_exists = ((~squares_values[i][0]& ~squares_values[i][1] & squares_values[i][2] & ~squares_values[i][3] & ~squares_values[i][4]) |
-                    (~squares_values[i+5][0]& ~squares_values[i+5][1] & squares_values[i+5][2] & ~squares_values[i+5][3] & ~squares_values[i+5][4]) |
-                    (~squares_values[i+10][0]& ~squares_values[i+10][1] & squares_values[i+10][2] & ~squares_values[i+10][3] & ~squares_values[i+10][4]) |
-                    (~squares_values[i+15][0]& ~squares_values[i+15][1] & squares_values[i+15][2] & ~squares_values[i+15][3] & ~squares_values[i+15][4]) |
-                    (~squares_values[i+20][0]& ~squares_values[i+20][1] & squares_values[i+20][2] & ~squares_values[i+20][3] & ~squares_values[i+20][4]))
-        four_exists = ((~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & squares_values[i][3] & ~squares_values[i][4]) |
-                    (~squares_values[i+5][0]& ~squares_values[i+5][1] & ~squares_values[i+5][2] & squares_values[i+5][3] & ~squares_values[i+5][4]) |
-                    (~squares_values[i+10][0]& ~squares_values[i+10][1] & ~squares_values[i+10][2] & squares_values[i+10][3] & ~squares_values[i+10][4]) |
-                    (~squares_values[i+15][0]& ~squares_values[i+15][1] & ~squares_values[i+15][2] & squares_values[i+15][3] & ~squares_values[i+15][4]) |
-                    (~squares_values[i+20][0]& ~squares_values[i+20][1] & ~squares_values[i+20][2] & squares_values[i+20][3] & ~squares_values[i+20][4]))
-        five_exists = ((~squares_values[i][0]& ~squares_values[i][1] & ~squares_values[i][2] & ~squares_values[i][3] & squares_values[i][4]) |
-                    (~squares_values[i+5][0]& ~squares_values[i+5][1] & ~squares_values[i+5][2] & ~squares_values[i+5][3] & squares_values[i+5][4]) |
-                    (~squares_values[i+10][0]& ~squares_values[i+10][1] & ~squares_values[i+10][2] & ~squares_values[i+10][3] & squares_values[i+10][4]) |
-                    (~squares_values[i+15][0]& ~squares_values[i+15][1] & ~squares_values[i+15][2] & ~squares_values[i+15][3] & squares_values[i+15][4]) |
-                    (~squares_values[i+20][0]& ~squares_values[i+20][1] & ~squares_values[i+20][2] & ~squares_values[i+20][3] & squares_values[i+20][4]))
+        elif(len(sq) == 3):
+            x = sq[0].value
+            y = sq[1].value
+            z = sq[2].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                            if((i*j*k) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1])')
 
-        #E.add_constraint(iff(col[i], one_exists & two_exists & three_exists & four_exists & five_exists))
-        #E.add_constraint(col[i])
-        E.add_constraint(one_exists & two_exists & three_exists & four_exists & five_exists)
+        elif(len(sq) == 4):
+            w = sq[0].value
+            x = sq[1].value
+            y = sq[2].value
+            z = sq[3].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                        for m in range(N+1): #represents the number held in sq[3]
+                            if((i*j*k*m) == region.rslt):
+                                #if they add up to the result, they're a valid combination for the constraint
+                                #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1] & sq[3].value['+str(m)+'-1])')
 
+        eval_statement = ''
+        i = 0
+        #skip the last element
+        while(i < len(statements)):
+            if(i == 0):
+                eval_statement = '('+statements[i]
+                i += 1
+                continue
+            else:
+                eval_statement += (' | ' + statements[i])
 
+        eval_statement += ')'
+
+        #evaluate code below
+        E.add_constraint(iff(region.sat, eval(eval_statement)))
+
+    '''Constraint: Every region must be satisifed'''
+    for i in range(len(o)):
+        if(o[i].operator == '+'):
+            add(o[i])
+        elif(o[i].operator == 'x'):
+            mult(o[i])
+        E.add_constraint(o[i].sat)
+    
     return E
+    
+    def div(region):
+        ''' 
+        @param: region of type Region
+        called to add constraint to the region if the op is division
+        '''
+        #everything in the string must be relative to the region
+        statements = []
+        sq = region.members  
+        if(len(sq) == 1):
+            #E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
+            statements.append('sq[0].value[region.rslt-1]')
+        
+        elif(len(sq) == 2):
+            x = sq[0].value
+            y = sq[1].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    if((i/j) == region.rslt):
+                        #if they divide to the result, they're a valid combination for the constraint
+                        #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
+                        statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
 
+        elif(len(sq) == 3):
+            x = sq[0].value
+            y = sq[1].value
+            z = sq[2].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                            if((i/j/k) == region.rslt):
+                                #if they divide to the result, they're a valid combination for the constraint
+                                #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1])')
+
+        elif(len(sq) == 4):
+            w = sq[0].value
+            x = sq[1].value
+            y = sq[2].value
+            z = sq[3].value
+            for i in range(N+1): #represents the number held sq[0]
+                for j in range(N+1): #represents the number held in sq[1]
+                    for k in range(N+1): #represents the number held in sq[2]
+                        for m in range(N+1): #represents the number held in sq[3]
+                            if((i/j/k/m) == region.rslt):
+                                #if they divide to the result, they're a valid combination for the constraint
+                                #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1] & sq[3].value['+str(m)+'-1])')
+
+        eval_statement = ''
+        i = 0
+        #skip the last element
+        while(i < len(statements)):
+            if(i == 0):
+                eval_statement = '('+statements[i]
+                i += 1
+                continue
+            else:
+                eval_statement += (' | ' + statements[i])
+
+        eval_statement += ')'
+
+        #evaluate code below
+        E.add_constraint(iff(region.sat, eval(eval_statement)))
+
+    '''Constraint: Every region must be satisifed'''
+    for i in range(len(o)):
+        if(o[i].operator == '+'):
+            add(o[i])
+        elif(o[i].operator == 'x'):
+            mult(o[i])
+        elif(o[i].operator == '/'):
+            div(o[i])
+        E.add_constraint(o[i].sat)
+    
+    return E
+    
 
 if __name__ == "__main__":
 
-    T = test_kenken3x3()
+    T = test_kenken(3)
     print("\n------Begin Tests------")
     print(T.vars())
     print("\nSatisfiable: %s" % T.is_satisfiable())
