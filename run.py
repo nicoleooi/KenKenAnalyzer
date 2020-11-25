@@ -11,7 +11,7 @@ TO DO constraints:
 '''
 
 class Square:
-    def _init_(self,is_valid, value):
+    def __init__(self,is_valid, value):
         self.is_valid = is_valid
         self.value = value
 
@@ -22,7 +22,7 @@ class Square:
             return (self.value.index(True) + 1)
 
 class Region:
-    def _init_(self, members, rslt, operator, sat):
+    def __init__(self, members, rslt, operator, sat):
         self.members = members
         self.operator = operator
         self.rslt = rslt
