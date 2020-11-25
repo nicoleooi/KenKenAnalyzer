@@ -183,7 +183,7 @@ def test_kenken(N):
                     if((i+j) == region.rslt):
                         #if they add up to the result, they're a valid combination for the constraint
                         #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
-                        statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1])')
+                        statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
 
         elif(len(sq) == 3):
             x = sq[0].value
@@ -195,7 +195,7 @@ def test_kenken(N):
                             if((i+j+k) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
                                 #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
-                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1])')
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1])')
 
         elif(len(sq) == 4):
             w = sq[0].value
@@ -209,7 +209,7 @@ def test_kenken(N):
                             if((i+j+k+m) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
                                 #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
-                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1] & sq[3].value['+m+'-1])')
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1] & sq[3].value['+str(m)+'-1])')
 
         eval_statement = ''
         i = 0
@@ -247,7 +247,7 @@ def test_kenken(N):
                     if((i*j) == region.rslt):
                         #if they add up to the result, they're a valid combination for the constraint
                         #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
-                        statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1])')
+                        statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
 
         elif(len(sq) == 3):
             x = sq[0].value
@@ -259,7 +259,7 @@ def test_kenken(N):
                             if((i*j*k) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
                                 #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
-                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1])')
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1])')
 
         elif(len(sq) == 4):
             w = sq[0].value
@@ -273,7 +273,7 @@ def test_kenken(N):
                             if((i*j*k*m) == region.rslt):
                                 #if they add up to the result, they're a valid combination for the constraint
                                 #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
-                                statements.append('(sq[0].value['+i+'-1] & sq[1].value['+j+'-1] & sq[2].value['+k+'-1] & sq[3].value['+m+'-1])')
+                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1] & sq[3].value['+str(m)+'-1])')
 
         eval_statement = ''
         i = 0
