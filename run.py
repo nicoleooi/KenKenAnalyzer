@@ -162,11 +162,10 @@ def test_kenken(N):
     
     # Logic for checking arithmetic of regions - ASSUMES ADDITION, NOT FULLY SCALED YET!
     operationList = []
-    idx = 0
-    for region in o:
+    for idx, region in enumerate(o):
         sq = region.members
         if region.get_len() == 1:
-            operationList.append(Var(f'{region[0][0]}_{region[1]}'))
+            operationList.append(Var(f'{sq[0].get_val}_{region.rslt-1}'))
             E.add_constraint(operationList[idx])
         elif region.get_len() == 2:
             varList = []
@@ -175,7 +174,7 @@ def test_kenken(N):
                     condition = f'{i}{region.operator}{j}'
                     if (abs(eval(condition)) == region.rslt-1): # this line supports subtraction, multiplication, addition
                         # AND the two squares that make up the sum/difference/product
-                        varList.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
+                        varList.append(Var(f'{sq[0].get_val}_{i}')&Var(f'{sq[1].get_val}_{j}'))
         elif region.get_len() == 3:
             operationList.append("5")
             pass
@@ -185,7 +184,6 @@ def test_kenken(N):
 
         operationList.append(Var(f'group{idx}result_{region.rslt-1}'))
     
-        previous = 0
         # Add constraint of the group's result
         E.add_constraint(operationList[idx])
 
@@ -195,9 +193,8 @@ def test_kenken(N):
             varList[jdx] = previous
 
         # Add constraint that the group's result implies ONE OF the combinations of squares
-        E.add_constraint(implies(operationList[idx],previous))
-        
-        idx = idx + 1
+        if(len(varList) > 1):
+            E.add_constraint(implies(operationList[idx],previous))
 
     return E
 
