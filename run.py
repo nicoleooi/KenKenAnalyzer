@@ -1,4 +1,5 @@
 from nnf import Var
+from nnf.operators import xor, implies
 from lib204 import Encoding
 from string import ascii_lowercase
 
@@ -158,147 +159,46 @@ def test_kenken(N):
         E.add_constraint(iff(col[i], one_exists & two_exists & three_exists))
         E.add_constraint(col[i])
 
-    '''
-    Defining functions for each operator
-    Constraint: Every region can only be satisfied if the operator results in the result
-    '''
-
-    def add(region): 
-        ''' 
-        @param: region of type Region
-        called to add constraint to the region if the op is addition
-        '''
-        #everything in the string must be relative to the region
-        statements = []
-        sq = region.members  
-        if(len(sq) == 1):
-            #E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
-            statements.append('sq[0].value[region.rslt-1]')
-        
-        elif(len(sq) == 2):
-            x = sq[0].value
-            y = sq[1].value
-            for i in range(N+1): #represents the number held sq[0]
-                for j in range(N+1): #represents the number held in sq[1]
-                    if((i+j) == region.rslt):
-                        #if they add up to the result, they're a valid combination for the constraint
-                        #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
-                        statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
-
-        elif(len(sq) == 3):
-            x = sq[0].value
-            y = sq[1].value
-            z = sq[2].value
-            for i in range(N+1): #represents the number held sq[0]
-                for j in range(N+1): #represents the number held in sq[1]
-                    for k in range(N+1): #represents the number held in sq[2]
-                            if((i+j+k) == region.rslt):
-                                #if they add up to the result, they're a valid combination for the constraint
-                                #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
-                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1])')
-
-        elif(len(sq) == 4):
-            w = sq[0].value
-            x = sq[1].value
-            y = sq[2].value
-            z = sq[3].value
-            for i in range(N+1): #represents the number held sq[0]
-                for j in range(N+1): #represents the number held in sq[1]
-                    for k in range(N+1): #represents the number held in sq[2]
-                        for m in range(N+1): #represents the number held in sq[3]
-                            if((i+j+k+m) == region.rslt):
-                                #if they add up to the result, they're a valid combination for the constraint
-                                #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
-                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1] & sq[3].value['+str(m)+'-1])')
-
-        eval_statement = ''
-        i = 0
-        #skip the last element
-        while(i < len(statements)):
-            if(i == 0):
-                eval_statement = '(' + statements[i]
-                i += 1
-                continue
-            else:
-                eval_statement += (' | ' + statements[i])
-
-        eval_statement += ')'
-
-        #evaluate code below
-        E.add_constraint(iff(region.sat, eval(eval_statement)))
-
-    def mult(region): 
-        ''' 
-        @param: region of type Region
-        called to add constraint to the region if the op is addition
-        '''
-        #everything in the string must be relative to the region
-        statements = []
-        sq = region.members  
-        if(len(sq) == 1):
-            #E.add_constraint(iff(region.sat, sq[0].value[region.rslt-1]))
-            statements.append('sq[0].value[region.rslt-1]')
-        
-        elif(len(sq) == 2):
-            x = sq[0].value
-            y = sq[1].value
-            for i in range(N+1): #represents the number held sq[0]
-                for j in range(N+1): #represents the number held in sq[1]
-                    if((i*j) == region.rslt):
-                        #if they add up to the result, they're a valid combination for the constraint
-                        #E.add_constraint(iff(region.sat, x[i-1] & y[j-1]))
-                        statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
-
-        elif(len(sq) == 3):
-            x = sq[0].value
-            y = sq[1].value
-            z = sq[2].value
-            for i in range(N+1): #represents the number held sq[0]
-                for j in range(N+1): #represents the number held in sq[1]
-                    for k in range(N+1): #represents the number held in sq[2]
-                            if((i*j*k) == region.rslt):
-                                #if they add up to the result, they're a valid combination for the constraint
-                                #E.add_constraint(iff(region.sat, x[i-1] & y[j-1] & z[k-1]))
-                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1])')
-
-        elif(len(sq) == 4):
-            w = sq[0].value
-            x = sq[1].value
-            y = sq[2].value
-            z = sq[3].value
-            for i in range(N+1): #represents the number held sq[0]
-                for j in range(N+1): #represents the number held in sq[1]
-                    for k in range(N+1): #represents the number held in sq[2]
-                        for m in range(N+1): #represents the number held in sq[3]
-                            if((i*j*k*m) == region.rslt):
-                                #if they add up to the result, they're a valid combination for the constraint
-                                #E.add_constraint(iff(region.sat, w[i-1] & x[j-1] & y[k-1] & z[m-1]))
-                                statements.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1] & sq[2].value['+str(k)+'-1] & sq[3].value['+str(m)+'-1])')
-
-        eval_statement = ''
-        i = 0
-        #skip the last element
-        while(i < len(statements)):
-            if(i == 0):
-                eval_statement = '('+statements[i]
-                i += 1
-                continue
-            else:
-                eval_statement += (' | ' + statements[i])
-
-        eval_statement += ')'
-
-        #evaluate code below
-        E.add_constraint(iff(region.sat, eval(eval_statement)))
-
-    '''Constraint: Every region must be satisifed'''
-    for i in range(len(o)):
-        if(o[i].operator == '+'):
-            add(o[i])
-        elif(o[i].operator == 'x'):
-            mult(o[i])
-        E.add_constraint(o[i].sat)
     
+    # Logic for checking arithmetic of regions - ASSUMES ADDITION, NOT FULLY SCALED YET!
+    operationList = []
+    idx = 0
+    for region in o:
+        sq = region.members
+        if region.get_len() == 1:
+            operationList.append(Var(f'{region[0][0]}_{region[1]}'))
+            E.add_constraint(operationList[idx])
+        elif region.get_len() == 2:
+            varList = []
+            for i in range(1,4):
+                for j in range(1,4):
+                    condition = f'{i}{region.operator}{j}'
+                    if (abs(eval(condition)) == region.rslt-1): # this line supports subtraction, multiplication, addition
+                        # AND the two squares that make up the sum/difference/product
+                        varList.append('(sq[0].value['+str(i)+'-1] & sq[1].value['+str(j)+'-1])')
+        elif region.get_len() == 3:
+            operationList.append("5")
+            pass
+        elif region.get_len() == 4:
+            operationList.append("5")
+            pass  
+
+        operationList.append(Var(f'group{idx}result_{region.rslt-1}'))
+    
+        previous = 0
+        # Add constraint of the group's result
+        E.add_constraint(operationList[idx])
+
+        # Create combined XOR statement (for all the possible square combinations)
+        for jdx in range(1,len(varList)):
+            previous = xor(varList[jdx-1],varList[jdx])
+            varList[jdx] = previous
+
+        # Add constraint that the group's result implies ONE OF the combinations of squares
+        E.add_constraint(implies(operationList[idx],previous))
+        
+        idx = idx + 1
+
     return E
 
 if __name__ == "__main__":
