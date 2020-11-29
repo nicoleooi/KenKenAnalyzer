@@ -17,10 +17,7 @@ class Square:
         self.value = value
 
     def get_val(self):
-        if(self.value.isnull()): #no values created yet
-            return -1
-        else:
-            return (self.value.index(True) + 1)
+        return (self.value.index(True) + 1)
 
 class Region:
     def __init__(self, members, rslt, operator, sat):
@@ -61,23 +58,26 @@ def displayBoard(solution, dim):
     true_sol = getTrueAtoms(solution)
     board = []
     print("\nSolved solution of board:")
+    for i in range(dim):
+        print("    "+str(i), end='')
+      
     for atom in true_sol:
         if len(atom) == 4:
             board.append(getSquareVal(atom))
     for i in range(dim*dim):
         if i%dim == 0:
-            print("\n|",end='')       
+            charOffset = chr(ord('a')+int(i/dim))
+            print("\n")
+            print(f'{charOffset}'+'|',end='')
         print(" %d | " % board[i],end='')
     print("\n")
 
 
 def printConfig(boardConfig):
-    """
-
-    """
     print("\nInitial board configuration:")
-    for region in boardConfig:
-        print(region)
+    for reg in boardConfig:
+        for m in reg.members:
+            print(m.is_valid)
     print("* Note: ! indicates singular value in the specified box")
 
 #dynamic test of kenken, pass in the dimension of the grid
@@ -165,16 +165,16 @@ def test_kenken(N):
     for idx, region in enumerate(o):
         sq = region.members
         if region.get_len() == 1:
-            operationList.append(Var(f'{sq[0].get_val}_{region.rslt-1}'))
+            operationList.append(Var(f'{sq[0].value}_{region.rslt}'))
             E.add_constraint(operationList[idx])
         elif region.get_len() == 2:
             varList = []
             for i in range(1,4):
                 for j in range(1,4):
                     condition = f'{i}{region.operator}{j}'
-                    if (abs(eval(condition)) == region.rslt-1): # this line supports subtraction, multiplication, addition
+                    if (abs(eval(condition)) == region.rslt): # this line supports subtraction, multiplication, addition
                         # AND the two squares that make up the sum/difference/product
-                        varList.append(Var(f'{sq[0].get_val}_{i}')&Var(f'{sq[1].get_val}_{j}'))
+                        varList.append(Var(f'{sq[0].is_valid}_{i}')&Var(f'{sq[1].is_valid}_{j}'))
         elif region.get_len() == 3:
             operationList.append("5")
             pass
@@ -182,7 +182,7 @@ def test_kenken(N):
             operationList.append("5")
             pass  
 
-        operationList.append(Var(f'group{idx}result_{region.rslt-1}'))
+        operationList.append(Var(f'group{idx}result_{region.rslt}'))
     
         # Add constraint of the group's result
         E.add_constraint(operationList[idx])
