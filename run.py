@@ -1,5 +1,6 @@
 
 from nnf import Var
+from nnf.operators import xor, implies
 from lib204 import Encoding
 from string import ascii_lowercase
 
@@ -141,9 +142,8 @@ def test_kenken3x3():
     #if (f'region[0][0]_{i}')
 
 
-    # Logic for checking arithmetic of regions - Not complete yet!!
+    # Logic for checking arithmetic of regions - ASSUMES ADDITION, NOT FULLY SCALED YET!
     for idx, region in enumerate(o):
-        print(region[0])
         if len(region[0]) == 1:
             operationList.append(Var(f'{region[0][0]}_{region[1]}'))
             E.add_constraint(operationList[idx])
@@ -151,23 +151,30 @@ def test_kenken3x3():
             varList = []
             for i in range(1,4):
                 for j in range(1,4):
-                    if (i+j == region[1]):
-                        varList.append(Var(f'{region[0][0]}_{i}'))
-                        varList.append(Var(f'{region[0][1]}_{j}'))
-
-                        #E.add_constraint((Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')).negate() | Var(f'group{idx}result_{i+j}'))
-                        #E.add_constraint(Var(f'group{idx}result_{i+j}').negate() | (Var(f'{region[0][0]}_{i}') & Var(f'{region[0][1]}_{j}')))
-            operationList.append(Var(f'group{idx}result_{region[1]}'))
-            #E.add_constraint(operationList[idx].negate() | (varList[0] & varList[1]) | (varList[2] & varList[3]))
-
-            #operationList.append("Hi")
-            E.add_constraint(operationList[idx])
+                    condition = f'{i}{region[2]}{j}'
+                    if (abs(eval(condition)) == region[1]): # this line supports subtraction, multiplication, addition
+                        # AND the two squares that make up the sum/difference/product
+                        varList.append(Var(f'{region[0][0]}_{i}')&Var(f'{region[0][1]}_{j}'))
         elif len(region[0]) == 3:
             operationList.append("5")
             pass
         elif len(region[0]) == 4:
             operationList.append("5")
             pass  
+
+        operationList.append(Var(f'group{idx}result_{region[1]}'))
+
+        # Add constraint of the group's result
+        E.add_constraint(operationList[idx])
+
+        # Create combined XOR statement (for all the possible square combinations)
+        for jdx in range(1,len(varList)):
+            previous = xor(varList[jdx-1],varList[jdx])
+            varList[jdx] = previous
+
+        # Add constraint that the group's result implies ONE OF the combinations of squares
+        E.add_constraint(implies(operationList[idx],previous))
+
     return E
 
 def test_kenken5x5():
