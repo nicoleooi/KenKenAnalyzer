@@ -14,11 +14,10 @@ class Square:
         return (self.value.index(True) + 1)
 
 class Region:
-    def __init__(self, members, rslt, operator, sat):
+    def __init__(self, members, rslt, operator):
         self.members = members
         self.operator = operator
         self.rslt = rslt
-        self.sat = sat
 
     def get_len(self):
         return len(self.members)
@@ -111,53 +110,53 @@ def test_kenken(N):
     """
     #3x3 ADDITION ONLY BOARD (1 solution - easy?)
     o = []
-    o.append(Region([board[0],board[3]],3,'+', Var('region1')))
-    o.append(Region([board[1],board[4]],5,'+', Var('region2')))
-    o.append(Region([board[2]],1,'!', Var('region3')))
-    o.append(Region([board[5],board[8]],5,'+',Var('region4')))
-    o.append(Region([board[6],board[7]],4,'+',Var('region5')))
+    o.append(Region([board[0],board[3]],3,'+'))
+    o.append(Region([board[1],board[4]],5,'+'))
+    o.append(Region([board[2]],1,'!'))
+    o.append(Region([board[5],board[8]],5,'+'))
+    o.append(Region([board[6],board[7]],4,'+'))
     printConfig(o)
     """
 
     
     # 3x3 BOARD WITH MULTIPLICATION, ADDITION, SUBTRACTION (1 solution - medium?)
     o = []
-    o.append(Region([board[0],board[1],board[3]],6,'*', Var('region1')))
-    o.append(Region([board[2]],1,'!', Var('region2')))
-    o.append(Region([board[4],board[5], board[8]],8,'*',Var('region3')))
-    o.append(Region([board[6],board[7]],1,'-',Var('region4')))
+    o.append(Region([board[0],board[1],board[3]],6,'*'))
+    o.append(Region([board[2]],1,'!'))
+    o.append(Region([board[4],board[5], board[8]],8,'*'))
+    o.append(Region([board[6],board[7]],1,'-'))
     
 
     """
     # 3x3 BOARD WITH DIVISION, ADDITION, SUBTRACTION (2 solutions - hard?)
     o = []
-    o.append(Region([board[0],board[3]],3,'/', Var('region1')))
-    o.append(Region([board[1],board[2],board[4],board[5]],8,'+', Var('region2')))
-    o.append(Region([board[6],board[7]],1,'-',Var('region3')))
-    o.append(Region([board[8]],1,'!',Var('region4')))
+    o.append(Region([board[0],board[3]],3,'/'))
+    o.append(Region([board[1],board[2],board[4],board[5]],8,'+'))
+    o.append(Region([board[6],board[7]],1,'-'))
+    o.append(Region([board[8]],1,'!'))
     """
     
     """
     # 4x4 BOARD WITH ADDITION, SUBTRACTION, DIVISION, MULTIPLICATION (3 solutions - very hard?)
     o = []
-    o.append(Region([board[0],board[1],board[4],board[8]],12,'*', Var('region1')))
-    o.append(Region([board[2],board[3]],2,'/', Var('region2')))
-    o.append(Region([board[5],board[9]],1,'-',Var('region3')))
-    o.append(Region([board[6],board[7],board[10]],8,'+',Var('region4')))
-    o.append(Region([board[11],board[14],board[15]],6,'+',Var('region5')))
-    o.append(Region([board[12],board[13]],2,'-',Var('region6')))
+    o.append(Region([board[0],board[1],board[4],board[8]],12,'*'))
+    o.append(Region([board[2],board[3]],2,'/'))
+    o.append(Region([board[5],board[9]],1,'-'))
+    o.append(Region([board[6],board[7],board[10]],8,'+'))
+    o.append(Region([board[11],board[14],board[15]],6,'+'))
+    o.append(Region([board[12],board[13]],2,'-'))
     """
 
     """
     # 4x4 BOARD WITH ADDITION, MULTIPLICATION, SUBTRACTION (3 solutions - medium?)
     o = []
-    o.append(Region([board[0],board[1],board[4]],8,'*', Var('region1')))
-    o.append(Region([board[2],board[3],board[7]],8,'+', Var('region2')))
-    o.append(Region([board[5],board[6]],6,'*',Var('region3')))
-    o.append(Region([board[8],board[12]],4,'+',Var('region4')))
-    o.append(Region([board[9],board[10],board[13]],9,'+',Var('region5')))
-    o.append(Region([board[14]],1,'!',Var('region6')))
-    o.append(Region([board[11],board[15]],2,'-',Var('region7')))
+    o.append(Region([board[0],board[1],board[4]],8,'*'))
+    o.append(Region([board[2],board[3],board[7]],8,'+'))
+    o.append(Region([board[5],board[6]],6,'*'))
+    o.append(Region([board[8],board[12]],4,'+'))
+    o.append(Region([board[9],board[10],board[13]],9,'+'))
+    o.append(Region([board[14]],1,'!'))
+    o.append(Region([board[11],board[15]],2,'-'))
     """
 
     print("Board layout defined:")
