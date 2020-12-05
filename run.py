@@ -4,19 +4,23 @@ from lib204 import Encoding
 from string import ascii_lowercase
 import time
 
-
+'''Each individual grid in the board is represented by a Square. ie. a 3x3 kenken board will have 9 Squares'''
 class Square:
-    def __init__(self,is_valid, value):
-        self.is_valid = is_valid
+    def __init__(self, is_valid, value):
+        #proposition for whether the square contains a number from 1 - N
+        self.is_valid = is_valid 
+        #proposition for value of the square (list of N nnf variables)
         self.value = value
 
-    def get_val(self):
-        return (self.value.index(True) + 1)
-
+'''Each region in the board is represented by bolded borders around its grid members, an operator and result. 
+    For further clarification, refer to the final report.'''
 class Region:
     def __init__(self, members, rslt, operator):
+        #list of Square objects
         self.members = members
+        #char of operator corresponding to region
         self.operator = operator
+        #int of result required for region
         self.rslt = rslt
 
     def get_len(self):
@@ -28,8 +32,7 @@ class Region:
 def getSquareVal(atom):
     """
     Helper function used to retrieve the value of the number represented from the nnf Var passed in as a parameter
-    Will be used in the cage arithmetic section - not implemented yet
-
+    Used in displaying board solution after calling SAT solver
     """
     for x in atom:
         if x.isdigit():
@@ -78,6 +81,10 @@ def printConfig(boardConfig):
 
 #dynamic test of kenken, pass in the dimension of the grid
 def test_kenken(N): 
+    #scope of project constrained to 3x3 and 4x4 boards
+    if((N > 4) | (N < 3)):
+        return -1
+
     E = Encoding()
     '''Create row and column propositions'''
     row = []
@@ -102,10 +109,12 @@ def test_kenken(N):
 
     '''
     Create Regions, o is a list of Regions
+    Uncomment the desired configuration
+    DO NOT uncomment more than one configuration
     '''
-
-    
-    # All of these board have suggested difficulty based on how long it took for the SAT solver to get a solution. This needs to be converted into a quantifiable metric instead of qualitative.
+    # TODO: Lukas look at the metric for difficulty
+    # All of these board have suggested difficulty based on how long it took for the SAT solver to get a solution. 
+    # This needs to be converted into a quantifiable metric instead of qualitative.
 
     """
     #3x3 ADDITION ONLY BOARD (1 solution - easy?)
@@ -162,7 +171,7 @@ def test_kenken(N):
     print("Board layout defined:")
     
 
-    ''' Constraint: Numbers on board must be from 1-N'''
+    ''' Constraint: Numbers on board must be from 1-N, sets the constraint for the proposition is_valid in each Square'''
     for i in range(len(board)):
         #at each square, access the list for squares_values
         #true if the square value is equal to the specified val
@@ -269,9 +278,8 @@ def test_kenken(N):
         E.add_constraint(col[i])
     print("Column constraints added.")
     
-    
-    ''' Constraint: Each region must have squares that provide an arithmetic result as defined by the board configuration'''
-
+    ''' Constraint: Each region must have squares that provide an arithmetic result as defined by the region's result and operator,
+        accessed as region.rslt and region.operator'''
     operationList = []
     for idx, region in enumerate(o):
         varList = []
@@ -302,9 +310,6 @@ def test_kenken(N):
                             if (abs(eval(condition)) == region.rslt): 
                                 # AND the two squares that make up the sum/difference/product
                                 varList.append(Var(f'{sq[0].is_valid}_{i}')&Var(f'{sq[1].is_valid}_{j}'))
-
-                        # add support for division
-
 
         elif region.get_len() == 3:
             for i in range(1,N+1):
@@ -340,7 +345,6 @@ def test_kenken(N):
         # Add constraint that the group's result implies ONE OF the combinations of squares
         if(len(varList) > 1):
             E.add_constraint(implies(operationList[idx],previous))
-        
     
     print("Arithmetic constraints added. Finished definition.")
 
@@ -355,7 +359,7 @@ if __name__ == "__main__":
     print("\nSatisfiable: %s" % T.is_satisfiable())
     numSolutions = T.count_solutions()
     if numSolutions != 0:
-        print("# Solutions: %d" % numSolutions) # commented out because it hangs when testing kenken5x5
+        print("# Solutions: %d" % numSolutions) 
         startTime = time.perf_counter()
         sol = T.solve()
         endTime = time.perf_counter()
@@ -370,7 +374,6 @@ if __name__ == "__main__":
         else:
             print("There is only 1 solution to this KenKen configuration. This would be considered a valid configuration.")
 
-
         # The time taken and therefore difficulty is very affected by regions with higher number of squares (3,4 size regions)
         timeTaken = endTime-startTime
 
@@ -383,8 +386,4 @@ if __name__ == "__main__":
         else:
             difficulty = "VERY hard"
         print(f'Based on the time taken for the computer to solve this configuration ({timeTaken:.2f}s), it would be considered {difficulty} difficulty.\nPLEASE NOTE: this difficulty value is only an approximation and is very affected by regions with >3 squares.')
-    
-    
-    #print("\nVariable likelihoods (work in progress):")
-    #for v,vn in zip([a,b,c,x,y,z], 'abcxyz'):
-    #    print(" %s: %.2f" % (vn, T.likelihood(v)))
+
