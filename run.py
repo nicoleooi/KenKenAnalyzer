@@ -352,6 +352,8 @@ def test_kenken(N):
 
 if __name__ == "__main__":
 
+    #TODO: Lukas can you look over the commented lines and see if they can be deleted or if it was just for debugging purposes?
+
     kenken_size = 3
     T = test_kenken(kenken_size)
     print("\n------Begin Tests------")
