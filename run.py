@@ -107,74 +107,82 @@ def test_kenken(N):
                 values.append(Var(f'{charOffset}{j}_{x}'))
             board.append(Square(is_valid, values))       
 
-    '''
-    Create Regions, o is a list of Regions
-    Uncomment the desired configuration
-    DO NOT uncomment more than one configuration
-    '''
-    # TODO: Lukas look at the metric for difficulty
-    # All of these board have suggested difficulty based on how long it took for the SAT solver to get a solution. 
-    # This needs to be converted into a quantifiable metric instead of qualitative.
 
-    """
-    #3x3 ADDITION ONLY BOARD (1 solution - easy?)
-    o = []
-    o.append(Region([board[0],board[3]],3,'+'))
-    o.append(Region([board[1],board[4]],5,'+'))
-    o.append(Region([board[2]],1,'!'))
-    o.append(Region([board[5],board[8]],5,'+'))
-    o.append(Region([board[6],board[7]],4,'+'))
-    printConfig(o)
-    """
+    try:
+
+        '''
+        Create Regions, o is a list of Regions
+        Uncomment the desired configuration, DO NOT uncomment more than one configuration or else it will just solve the most recent one.
+        Board configurations are also listed along with the number of solutions they have and their classified difficulty.
+        If you are switching between a 3x3 and 4x4 configuration, set the kenken_size variable to the proper dimensions at the top of the main function.
+        '''
 
     
-    # 3x3 BOARD WITH MULTIPLICATION, ADDITION, SUBTRACTION (1 solution - medium?)
-    o = []
-    o.append(Region([board[0],board[1],board[3]],6,'*'))
-    o.append(Region([board[2]],1,'!'))
-    o.append(Region([board[4],board[5], board[8]],8,'*'))
-    o.append(Region([board[6],board[7]],1,'-'))
-    
+        """
+        # 3x3 ADDITION ONLY BOARD (1 solution - easy)
+        o = []
+        o.append(Region([board[0],board[3]],3,'+'))
+        o.append(Region([board[1],board[4]],5,'+'))
+        o.append(Region([board[2]],1,'!'))
+        o.append(Region([board[5],board[8]],5,'+'))
+        o.append(Region([board[6],board[7]],4,'+'))
+        """
 
-    """
-    # 3x3 BOARD WITH DIVISION, ADDITION, SUBTRACTION (2 solutions - hard?)
-    o = []
-    o.append(Region([board[0],board[3]],3,'/'))
-    o.append(Region([board[1],board[2],board[4],board[5]],8,'+'))
-    o.append(Region([board[6],board[7]],1,'-'))
-    o.append(Region([board[8]],1,'!'))
-    """
-    
-    """
-    # 4x4 BOARD WITH ADDITION, SUBTRACTION, DIVISION, MULTIPLICATION (3 solutions - very hard?)
-    o = []
-    o.append(Region([board[0],board[1],board[4],board[8]],12,'*'))
-    o.append(Region([board[2],board[3]],2,'/'))
-    o.append(Region([board[5],board[9]],1,'-'))
-    o.append(Region([board[6],board[7],board[10]],8,'+'))
-    o.append(Region([board[11],board[14],board[15]],6,'+'))
-    o.append(Region([board[12],board[13]],2,'-'))
-    """
+        """
+        # 3x3 BOARD WITH MULTIPLICATION, ADDITION, SUBTRACTION (2 solutions - easy)
+        o = []
+        o.append(Region([board[0]],3,'!'))
+        o.append(Region([board[1],board[2]],1,'-'))
+        o.append(Region([board[3],board[4]],3,'+'))
+        o.append(Region([board[5]],3,'!'))
+        o.append(Region([board[6], board[7],board[8]],6,'*'))
+        """
 
-    """
-    # 4x4 BOARD WITH ADDITION, MULTIPLICATION, SUBTRACTION (3 solutions - medium?)
-    o = []
-    o.append(Region([board[0],board[1],board[4]],8,'*'))
-    o.append(Region([board[2],board[3],board[7]],8,'+'))
-    o.append(Region([board[5],board[6]],6,'*'))
-    o.append(Region([board[8],board[12]],4,'+'))
-    o.append(Region([board[9],board[10],board[13]],9,'+'))
-    o.append(Region([board[14]],1,'!'))
-    o.append(Region([board[11],board[15]],2,'-'))
-    """
+        
+        # 3x3 BOARD WITH DIVISION, ADDITION, SUBTRACTION (2 solutions - medium)
+        o = []
+        o.append(Region([board[0],board[3]],3,'/'))
+        o.append(Region([board[1],board[2],board[4],board[5]],8,'+'))
+        o.append(Region([board[6],board[7]],1,'-'))
+        o.append(Region([board[8]],1,'!'))
+        
+        
+
+        
+        """
+        # 4x4 BOARD WITH ADDITION, SUBTRACTION, DIVISION, MULTIPLICATION (3 solutions - very hard)
+        o = []
+        o.append(Region([board[0],board[1],board[4],board[8]],12,'*'))
+        o.append(Region([board[2],board[3]],2,'/'))
+        o.append(Region([board[5],board[9]],1,'-'))
+        o.append(Region([board[6],board[7],board[10]],8,'+'))
+        o.append(Region([board[11],board[14],board[15]],6,'+'))
+        o.append(Region([board[12],board[13]],2,'-'))
+        """
+
+        """
+        # 4x4 BOARD WITH ADDITION, MULTIPLICATION, SUBTRACTION (3 solutions - easy/medium)
+        o = []
+        o.append(Region([board[0],board[1],board[4]],8,'*'))
+        o.append(Region([board[2],board[3],board[7]],8,'+'))
+        o.append(Region([board[5],board[6]],6,'*'))
+        o.append(Region([board[8],board[12]],4,'+'))
+        o.append(Region([board[9],board[10],board[13]],9,'+'))
+        o.append(Region([board[14]],1,'!'))
+        o.append(Region([board[11],board[15]],2,'-'))
+        """
+    
+    except:
+        print("Incorrect specified board size or invalid board configuration! Please the kenken_size paramter at the top of the main function.")
+        quit()
 
     print("Board layout defined:")
     
 
     ''' Constraint: Numbers on board must be from 1-N, sets the constraint for the proposition is_valid in each Square'''
     for i in range(len(board)):
-        #at each square, access the list for squares_values
-        #true if the square value is equal to the specified val
+        # At each square, access the list for squares_values
+        # True if the square value is equal to the specified val
         sq = board[i]
         
         if N==3:
@@ -189,8 +197,7 @@ def test_kenken(N):
             is_four = (~sq.value[0]& ~sq.value[1] & ~sq.value[2]& sq.value[3])
             E.add_constraint(iff(sq.is_valid,( is_one | is_two | is_three | is_four)))
 
-        #square is valid iff the square holds one of these values
-        
+        # Square is valid iff the square holds one of these values
         E.add_constraint(sq.is_valid)
     print("Valid square constraints added.")
 
@@ -285,7 +292,8 @@ def test_kenken(N):
         varList = []
         sq = region.get_members()
         if region.get_len() == 1:
-            operationList.append(Var(f'{sq[0].is_valid}_{region.rslt}'))
+            varList.append(Var(f'{sq[0].is_valid}_{region.rslt}'))
+
         elif region.get_len() == 2:
             for i in range(1,N+1):
                 for j in range(1,N+1):
@@ -317,9 +325,11 @@ def test_kenken(N):
                     for k in range(1,N+1):
                         if region.operator != "/":
                             condition = f'{i}{region.operator}{j}{region.operator}{k}'                      
-                            if (abs(eval(condition)) == region.rslt): # this line supports subtraction, multiplication, addition
+                            if (abs(eval(condition)) == region.rslt): # this line supports subtraction, multiplication, addition (no division requried for regions of 3+ squares)
                                 # AND the two squares that make up the sum/difference/product
+                                
                                 varList.append(Var(f'{sq[0].is_valid}_{i}')&Var(f'{sq[1].is_valid}_{j}')&Var(f'{sq[2].is_valid}_{k}'))
+                                #print(len(varList))
 
         elif region.get_len() == 4:
             for i in range(1,N+1):
@@ -328,7 +338,7 @@ def test_kenken(N):
                         for l in range(1,N+1):
                             if region.operator != "/":
                                 condition = f'{i}{region.operator}{j}{region.operator}{k}{region.operator}{l}'                      
-                                if (abs(eval(condition)) == region.rslt): # this line supports subtraction, multiplication, addition
+                                if (abs(eval(condition)) == region.rslt): # this line supports subtraction, multiplication, addition (no division requried for regions of 3+ squares)
                                     # AND the two squares that make up the sum/difference/product
                                     varList.append(Var(f'{sq[0].is_valid}_{i}')&Var(f'{sq[1].is_valid}_{j}')&Var(f'{sq[2].is_valid}_{k}')&Var(f'{sq[3].is_valid}_{l}'))
 
@@ -337,48 +347,47 @@ def test_kenken(N):
         # Add constraint of the group's result
         E.add_constraint(operationList[idx])
 
-        # Create combined XOR statement (for all the possible square combinations)
-        for jdx in range(1,len(varList)):
-            previous = xor(varList[jdx-1],varList[jdx])
-            varList[jdx] = previous
+        if len(varList) == 1: # Only one possible option for the region's configuration
+            previous = varList[0]
+        else:
+            # Create combined XOR statement (for all the possible square combinations)
+            for jdx in range(1,len(varList)):
+                previous = xor(varList[jdx-1],varList[jdx])
+                varList[jdx] = previous
 
         # Add constraint that the group's result implies ONE OF the combinations of squares
-        if(len(varList) > 1):
-            E.add_constraint(implies(operationList[idx],previous))
+        E.add_constraint(implies(operationList[idx],previous))
     
     print("Arithmetic constraints added. Finished definition.")
 
     return E
 
 if __name__ == "__main__":
-
-    #TODO: Lukas can you look over the commented lines and see if they can be deleted or if it was just for debugging purposes?
-
     kenken_size = 3
     T = test_kenken(kenken_size)
     print("\n------Begin Tests------")
-    #print(T.vars())
     print("\nSatisfiable: %s" % T.is_satisfiable())
     numSolutions = T.count_solutions()
-    if numSolutions != 0:
+    if numSolutions != 0: # Board config has at least one solution
         print("# Solutions: %d" % numSolutions) 
         startTime = time.perf_counter()
         sol = T.solve()
         endTime = time.perf_counter()
         sorted_sol = getTrueAtoms(sol)
-        #print("   Solution: %s" % sol)
+        print("   Solution: %s" % sol)
         print("   \nSorted solution: %s" % sorted_sol)
         displayBoard(sol, kenken_size)
         
-        print("User results:\n")
+        print("\nUser results:\n")
         if numSolutions != 1:
-            print(f'There are {numSolutions} solutions to this KenKen configuration. It would technically not be a valid configuration (but we won\'t tell anyone).')
+            print(f'There are {numSolutions} solutions to this KenKen configuration. Since there is more than 1 solution, it would technically not be a valid configuration (but it is still solvable).')
         else:
             print("There is only 1 solution to this KenKen configuration. This would be considered a valid configuration.")
 
         # The time taken and therefore difficulty is very affected by regions with higher number of squares (3,4 size regions)
         timeTaken = endTime-startTime
 
+        # Difficulty level thresholds determined by testing solving time for configurations from each difficulty category from an online source of randomly-generated KenKen puzzles.
         if timeTaken < 1.5:
             difficulty = "easy"
         elif timeTaken<3:
@@ -387,5 +396,6 @@ if __name__ == "__main__":
             difficulty = "hard"
         else:
             difficulty = "VERY hard"
-        print(f'Based on the time taken for the computer to solve this configuration ({timeTaken:.2f}s), it would be considered {difficulty} difficulty.\nPLEASE NOTE: this difficulty value is only an approximation and is very affected by regions with >3 squares.')
-
+        print(f'Based on the time taken for the computer to solve this configuration ({timeTaken:.2f}s), it would be considered {difficulty} difficulty.\nPLEASE NOTE: this difficulty value is only an approximation and is very affected by regions with >3 squares.\n')
+    else: # Board config has no solutions
+        print("The provided board configuration has no solutions. It is invalid and its difficulty cannot be classified.\n")

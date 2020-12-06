@@ -8,9 +8,9 @@ The purpose of this project is to read an NxN Kenken board configuration and pro
 2. The suggested difficulty for the board configuration.
 3. A visual representation of the board solution.
 
-As of this version, all the developed code for the project can be found in run.py. One-hot encoding is used with booleans to represent the possible inputs of 1-N in each of the kenken square, with each bit represented by a nnf variable. 
+All the developed code for the project can be found in run.py. One-hot encoding is used with booleans to represent the possible inputs of 1-N in each of the kenken square, with each bit represented by a nnf variable. For more information of model implementation, please read the documentation in documents/final.
 
-The board configuration can be chosen from one of seven example configurations included in run.py. Example corresponding board configurations are shown below for a 3x3 and 4x4 board:
+Five example board configurations have been included in run.py. Example corresponding board configurations are shown below for board config #2 (3x3) and board config #5 (4x4) board:
 
 ![Image of kenken board configuration](https://raw.githubusercontent.com/CISC-204/modelling-project-107/master/images/Kenken_Board.png?token=AHC3LHG43YIACQTE67INB7K7VF4IE)
 
