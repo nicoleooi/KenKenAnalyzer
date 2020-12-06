@@ -128,7 +128,7 @@ def test_kenken(N):
         o.append(Region([board[6],board[7]],4,'+'))
         """
 
-        """
+        
         # 3x3 BOARD WITH MULTIPLICATION, ADDITION, SUBTRACTION (2 solutions - easy)
         o = []
         o.append(Region([board[0]],3,'!'))
@@ -136,16 +136,16 @@ def test_kenken(N):
         o.append(Region([board[3],board[4]],3,'+'))
         o.append(Region([board[5]],3,'!'))
         o.append(Region([board[6], board[7],board[8]],6,'*'))
-        """
-
         
+
+        """
         # 3x3 BOARD WITH DIVISION, ADDITION, SUBTRACTION (2 solutions - medium)
         o = []
         o.append(Region([board[0],board[3]],3,'/'))
         o.append(Region([board[1],board[2],board[4],board[5]],8,'+'))
         o.append(Region([board[6],board[7]],1,'-'))
         o.append(Region([board[8]],1,'!'))
-        
+        """
         
 
         
