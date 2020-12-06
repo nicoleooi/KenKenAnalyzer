@@ -10,10 +10,12 @@ The purpose of this project is to read an NxN Kenken board configuration and pro
 
 All the developed code for the project can be found in run.py. One-hot encoding is used with booleans to represent the possible inputs of 1-N in each of the kenken square, with each bit represented by a nnf variable. For more information of model implementation, please read the documentation in documents/final.
 
-Five example board configurations have been included in run.py. Example corresponding board configurations are shown below for board config #2 (3x3) and board config #5 (4x4) board:
+Five example board configurations have been included in run.py. Example corresponding board configurations are shown below for:
 
+Board config #2 (3x3):
 ![Image of kenken board configuration 2](images/board2.png)
 
+Board config #5 (4x4):
 ![Image of kenken board configuration 5](images/board5.png)
 
 
