@@ -12,7 +12,9 @@ All the developed code for the project can be found in run.py. One-hot encoding 
 
 Five example board configurations have been included in run.py. Example corresponding board configurations are shown below for board config #2 (3x3) and board config #5 (4x4) board:
 
-![Image of kenken board configuration](https://raw.githubusercontent.com/CISC-204/modelling-project-107/master/images/Kenken_Board.png?token=AHC3LHG43YIACQTE67INB7K7VF4IE)
+![Image of kenken board configuration 2](images/board2.png)
+
+![Image of kenken board configuration 5](images/board5.png)
 
 
 ## Structure
