@@ -13,9 +13,11 @@ All the developed code for the project can be found in run.py. One-hot encoding 
 Five example board configurations have been included in run.py. Example corresponding board configurations are shown below for:
 
 Board config #2 (3x3):
+
 ![Image of kenken board configuration 2](images/board2.png)
 
 Board config #5 (4x4):
+
 ![Image of kenken board configuration 5](images/board5.png)
 
 
