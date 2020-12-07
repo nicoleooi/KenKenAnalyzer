@@ -23,8 +23,6 @@ Board config #5 (4x4):
 
 ## Structure
 
-* `documents`: Contains folders for both of your draft and final submissions. README.md files are included in both.
+* `documents`: Contains folders the draft and final submissions (contains proofs.jp, modelling_report.docx)
 * `run.py`: General wrapper script that executes the test_kenken function. Runs auto-checks using the model produced by test_kenken.
 * `test.py`: Run this file to confirm that your submission has everything required. This essentially just means it will check for the right files and sufficient theory size.
-* `finalProofs.jp` : This contains the JAPE sequents we are proposing to prove. 
-* `modelling_project.pdf` : This contains the final report for the project. 
