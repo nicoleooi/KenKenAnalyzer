@@ -23,6 +23,6 @@ Board config #5 (4x4):
 
 ## Structure
 
-* `documents`: Contains folders the draft and final submissions (contains proofs.jp, modelling_report.docx)
+* `documents`: Contains folders for the draft and final submissions (contains proofs.jp, modelling_report.docx).
 * `run.py`: General wrapper script that executes the test_kenken function. Runs auto-checks using the model produced by test_kenken.
 * `test.py`: Run this file to confirm that your submission has everything required. This essentially just means it will check for the right files and sufficient theory size.
